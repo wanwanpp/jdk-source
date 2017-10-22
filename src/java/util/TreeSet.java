@@ -98,11 +98,13 @@ public class TreeSet<E> extends AbstractSet<E>
     private transient NavigableMap<E,Object> m;
 
     // Dummy value to associate with an Object in the backing Map
+    //    作为每个键的值添加到NavigableMap中
     private static final Object PRESENT = new Object();
 
     /**
      * Constructs a set backed by the specified navigable map.
      */
+    //不是public的，是内部用的
     TreeSet(NavigableMap<E,Object> m) {
         this.m = m;
     }
@@ -155,6 +157,8 @@ public class TreeSet<E> extends AbstractSet<E>
      *         not {@link Comparable}, or are not mutually comparable
      * @throws NullPointerException if the specified collection is null
      */
+
+    //比较器为null，假定元素实现了Comparable接口
     public TreeSet(Collection<? extends E> c) {
         this();
         addAll(c);

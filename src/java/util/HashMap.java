@@ -313,6 +313,8 @@ public class HashMap<K,V>
      * Inflates the table.
      */
     private void inflateTable(int toSize) {
+        //若用户创建HashMap时指定了新建map的初始容量，即这儿的toSize，这个toSize可能不是2的几次幂，
+        // 但是hashmap中为了方便运算需要将容量指定为2的多少次幂，因此使用了roundUpToPowerOf2方法进行转换。
         // Find a power of 2 >= toSize
         int capacity = roundUpToPowerOf2(toSize);
 
@@ -582,6 +584,7 @@ public class HashMap<K,V>
         }
 
         Entry[] newTable = new Entry[newCapacity];
+        //迁移元素到新的table（newTable）
         transfer(newTable, initHashSeedAsNeeded(newCapacity));
         table = newTable;
         threshold = (int)Math.min(newCapacity * loadFactor, MAXIMUM_CAPACITY + 1);
