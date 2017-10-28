@@ -1,5 +1,7 @@
 package com.jdk.test;
 
+import java.util.concurrent.RunnableFuture;
+
 /**
  * Created by 王萍 on 2017/10/26 0026.
  */
@@ -8,6 +10,7 @@ public class Test {
     public static void main(String[] args) {
 
         int COUNT_BITS=29;
+
 
         int CAPACITY = (1 << 29) - 1;
         System.out.println(Integer.toBinaryString(CAPACITY).length());

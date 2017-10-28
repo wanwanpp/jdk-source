@@ -1000,7 +1000,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                     mainLock.unlock();
                 }
                 if (workerAdded) {
-                    t.start();   //执行runWorker()方法。
+                    t.start();   //执行runWorker()方法。里面有beforeExecutor，afterExecutor方法。在commond.run()方法的前后执行。
                     workerStarted = true;
                 }
             }
@@ -1090,7 +1090,6 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      */
     private Runnable getTask() {
         boolean timedOut = false; // Did the last poll() time out?
-
         retry:
         for (; ; ) {
             int c = ctl.get();
@@ -1193,7 +1192,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                         !wt.isInterrupted())
                     wt.interrupt();
                 try {
-                    beforeExecute(wt, task);//空实现
+                    beforeExecute(wt, task);                //空实现
                     Throwable thrown = null;
                     try {
                         task.run();
@@ -1207,7 +1206,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                         thrown = x;
                         throw new Error(x);
                     } finally {
-                        afterExecute(task, thrown);//空实现
+                        afterExecute(task, thrown);                  //空实现
                     }
                 } finally {
                     task = null;
@@ -1425,10 +1424,11 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
             if (!isRunning(recheck) && remove(command))   //处于非运行状态则将刚添加的任务从队列中删除。
                 reject(command);    //拒绝任务
             else if (workerCountOf(recheck) == 0)
+                //如果活动线程数为0，则创建新线程
                 addWorker(null, false);//如果 true，则使用 corePoolSize 作为边界，否则使用 maximumPoolSize 作为边界
         }
         //如果线程池不处于RUNNING状态，或者workQueue满了，则执行以下代码
-        else if (!addWorker(command, false))
+        else if (!addWorker(command, false))  //workQueue满了之后就会添加新的工作线程直至workerSize=maxiumPoolSize。
             reject(command);
     }
 
