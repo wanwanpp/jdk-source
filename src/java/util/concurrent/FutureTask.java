@@ -114,6 +114,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
     /**
      * The result to return or exception to throw from get()
      */
+    //可通过get()方法得到的结果值。
     private Object outcome; // non-volatile, protected by state reads/writes
     /**
      * The thread running the callable; CASed during run()
@@ -276,7 +277,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
                 V result;
                 boolean ran;
                 try {
-                    result = c.call();
+                    result = c.call();          //call()方法中执行了runnable的run()方法。
                     ran = true;
                 } catch (Throwable ex) {
                     result = null;
@@ -284,7 +285,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
                     setException(ex);
                 }
                 if (ran)
-                    set(result);
+                    set(result);                 //如果执行完了，将执行结果设置到outcome属性。
             }
         } finally {
             // runner must be non-null until state is settled to
@@ -419,7 +420,6 @@ public class FutureTask<V> implements RunnableFuture<V> {
                 removeWaiter(q);
                 throw new InterruptedException();
             }
-
             int s = state;
             if (s > COMPLETING) {       //如果执行完了，可能是正常执行完了，也可能是被中断了，被取消了
                 if (q != null)
