@@ -131,6 +131,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
      * @param s completed state value
      */
     @SuppressWarnings("unchecked")
+    //根据state的值判断是否正常运行结束，正常运行结束则返回结果值outcome，否则抛异常。
     private V report(int s) throws ExecutionException {
         Object x = outcome;
         if (s == NORMAL)        //正常运行完结束状态
@@ -410,6 +411,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
      * @param nanos time to wait, if timed
      * @return state upon completion
      */
+    //如果执行完了就返回当前的状态值。
     private int awaitDone(boolean timed, long nanos)
             throws InterruptedException {
         final long deadline = timed ? System.nanoTime() + nanos : 0L;
