@@ -199,6 +199,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
     /**
      * @throws CancellationException {@inheritDoc}
      */
+    //学习博客：http://blog.csdn.net/u010412719/article/details/52137262
     public V get() throws InterruptedException, ExecutionException {
         int s = state;
         if (s <= COMPLETING)       //处于NEW或者COMPLETING，即开始状态和正在运行的状态。则执行。
