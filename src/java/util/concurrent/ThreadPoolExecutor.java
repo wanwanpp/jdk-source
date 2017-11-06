@@ -414,6 +414,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         return c & CAPACITY;
     }
 
+    //根据runState和workerCount获取ctl的值。
     private static int ctlOf(int rs, int wc) {
         return rs | wc;
     }
@@ -737,6 +738,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * from the queue during shutdown. The method is non-private to
      * allow access from ScheduledThreadPoolExecutor.
      */
+    //  1.shutdown状态，线程池和阻塞队列为空时
+    //  2.stop状态，线程池为空。
     final void tryTerminate() {
         for (; ; ) {
             int c = ctl.get();
@@ -829,13 +832,14 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      *                idle workers so that redundant workers exit promptly, not
      *                waiting for a straggler task to finish.
      */
+    //中断所有空闲的Worker
     private void interruptIdleWorkers(boolean onlyOne) {
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
             for (Worker w : workers) {
                 Thread t = w.thread;
-                if (!t.isInterrupted() && w.tryLock()) {
+                if (!t.isInterrupted() && w.tryLock()) {       //w.tryWork()方法，若worker空闲就会返回true，否则为false。
                     try {
                         t.interrupt();
                     } catch (SecurityException ignore) {
@@ -843,7 +847,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                         w.unlock();
                     }
                 }
-                if (onlyOne)
+                if (onlyOne)          //onlyOne表示只中断一个。
                     break;
             }
         } finally {
@@ -1447,9 +1451,14 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
+            //检查是否可以关闭。
             checkShutdownAccess();
+            //修改ctl的值，将state设置为shutdown状态。
             advanceRunState(SHUTDOWN);
+            //中断所有的空闲worker。
             interruptIdleWorkers();
+
+            //钩子方法，未实现，留给子类实现。
             onShutdown(); // hook for ScheduledThreadPoolExecutor
         } finally {
             mainLock.unlock();
