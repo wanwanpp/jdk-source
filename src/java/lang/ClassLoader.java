@@ -24,41 +24,21 @@
  */
 package java.lang;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.File;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.AccessController;
-import java.security.AccessControlContext;
-import java.security.CodeSource;
-import java.security.Policy;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.security.ProtectionDomain;
-import java.security.cert.Certificate;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Stack;
-import java.util.Map;
-import java.util.Vector;
-import java.util.Hashtable;
-import java.util.WeakHashMap;
-import java.util.concurrent.ConcurrentHashMap;
-import sun.misc.ClassFileTransformer;
-import sun.misc.CompoundEnumeration;
-import sun.misc.Resource;
-import sun.misc.URLClassPath;
-import sun.misc.VM;
+import sun.misc.*;
 import sun.reflect.CallerSensitive;
 import sun.reflect.Reflection;
 import sun.security.util.SecurityConstants;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.security.*;
+import java.security.cert.Certificate;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A class loader is an object that is responsible for loading classes. The
@@ -519,6 +499,7 @@ public abstract class ClassLoader {
      *
      * @since  1.2
      */
+    //由子类实现，在loadClass方法中调用。
     protected Class<?> findClass(String name) throws ClassNotFoundException {
         throw new ClassNotFoundException(name);
     }

@@ -34,6 +34,7 @@
  */
 
 package java.util.concurrent;
+
 import java.util.concurrent.locks.*;
 import java.util.*;
 
@@ -45,32 +46,32 @@ import java.util.*;
  * element that has been on the queue the shortest time. New elements
  * are inserted at the tail of the queue, and the queue retrieval
  * operations obtain elements at the head of the queue.
- *
+ * <p>
  * <p>This is a classic &quot;bounded buffer&quot;, in which a
  * fixed-sized array holds elements inserted by producers and
  * extracted by consumers.  Once created, the capacity cannot be
  * changed.  Attempts to {@code put} an element into a full queue
  * will result in the operation blocking; attempts to {@code take} an
  * element from an empty queue will similarly block.
- *
+ * <p>
  * <p>This class supports an optional fairness policy for ordering
  * waiting producer and consumer threads.  By default, this ordering
  * is not guaranteed. However, a queue constructed with fairness set
  * to {@code true} grants threads access in FIFO order. Fairness
  * generally decreases throughput but reduces variability and avoids
  * starvation.
- *
+ * <p>
  * <p>This class and its iterator implement all of the
  * <em>optional</em> methods of the {@link Collection} and {@link
  * Iterator} interfaces.
- *
+ * <p>
  * <p>This class is a member of the
  * <a href="{@docRoot}/../technotes/guides/collections/index.html">
  * Java Collections Framework</a>.
  *
- * @since 1.5
- * @author Doug Lea
  * @param <E> the type of elements held in this collection
+ * @author Doug Lea
+ * @since 1.5
  */
 public class ArrayBlockingQueue<E> extends AbstractQueue<E>
         implements BlockingQueue<E>, java.io.Serializable {
@@ -83,16 +84,24 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      */
     private static final long serialVersionUID = -817911632652898426L;
 
-    /** The queued items */
+    /**
+     * The queued items
+     */
     final Object[] items;
 
-    /** items index for next take, poll, peek or remove */
+    /**
+     * items index for next take, poll, peek or remove
+     */
     int takeIndex;
 
-    /** items index for next put, offer, or add */
+    /**
+     * items index for next put, offer, or add
+     */
     int putIndex;
 
-    /** Number of elements in the queue */
+    /**
+     * Number of elements in the queue
+     */
     int count;
 
     /*
@@ -100,11 +109,17 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      * found in any textbook.
      */
 
-    /** Main lock guarding all access */
+    /**
+     * Main lock guarding all access
+     */
     final ReentrantLock lock;
-    /** Condition for waiting takes */
+    /**
+     * Condition for waiting takes
+     */
     private final Condition notEmpty;
-    /** Condition for waiting puts */
+    /**
+     * Condition for waiting puts
+     */
     private final Condition notFull;
 
     // Internal helper methods
@@ -183,7 +198,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
             takeIndex = inc(takeIndex);
         } else {
             // slide over all others up through putIndex.
-            for (;;) {
+            for (; ; ) {
                 int nexti = inc(i);
                 if (nexti != putIndex) {
                     items[i] = items[nexti];
@@ -215,9 +230,9 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      * capacity and the specified access policy.
      *
      * @param capacity the capacity of this queue
-     * @param fair if {@code true} then queue accesses for threads blocked
-     *        on insertion or removal, are processed in FIFO order;
-     *        if {@code false} the access order is unspecified.
+     * @param fair     if {@code true} then queue accesses for threads blocked
+     *                 on insertion or removal, are processed in FIFO order;
+     *                 if {@code false} the access order is unspecified.
      * @throws IllegalArgumentException if {@code capacity < 1}
      */
     public ArrayBlockingQueue(int capacity, boolean fair) {
@@ -226,7 +241,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
         this.items = new Object[capacity];
         lock = new ReentrantLock(fair);
         notEmpty = lock.newCondition();
-        notFull =  lock.newCondition();
+        notFull = lock.newCondition();
     }
 
     /**
@@ -236,14 +251,14 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      * added in traversal order of the collection's iterator.
      *
      * @param capacity the capacity of this queue
-     * @param fair if {@code true} then queue accesses for threads blocked
-     *        on insertion or removal, are processed in FIFO order;
-     *        if {@code false} the access order is unspecified.
-     * @param c the collection of elements to initially contain
+     * @param fair     if {@code true} then queue accesses for threads blocked
+     *                 on insertion or removal, are processed in FIFO order;
+     *                 if {@code false} the access order is unspecified.
+     * @param c        the collection of elements to initially contain
      * @throws IllegalArgumentException if {@code capacity} is less than
-     *         {@code c.size()}, or less than 1.
-     * @throws NullPointerException if the specified collection or any
-     *         of its elements are null
+     *                                  {@code c.size()}, or less than 1.
+     * @throws NullPointerException     if the specified collection or any
+     *                                  of its elements are null
      */
     public ArrayBlockingQueue(int capacity, boolean fair,
                               Collection<? extends E> c) {
@@ -277,7 +292,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      * @param e the element to add
      * @return {@code true} (as specified by {@link Collection#add})
      * @throws IllegalStateException if this queue is full
-     * @throws NullPointerException if the specified element is null
+     * @throws NullPointerException  if the specified element is null
      */
     public boolean add(E e) {
         return super.add(e);
@@ -337,7 +352,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      * @throws NullPointerException {@inheritDoc}
      */
     public boolean offer(E e, long timeout, TimeUnit unit)
-        throws InterruptedException {
+            throws InterruptedException {
 
         checkNotNull(e);
         long nanos = unit.toNanos(timeout);
@@ -406,6 +421,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
 
     // this doc comment is overridden to remove the reference to collections
     // greater in size than Integer.MAX_VALUE
+
     /**
      * Returns the number of elements in this queue.
      *
@@ -423,12 +439,13 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
 
     // this doc comment is a modified copy of the inherited doc comment,
     // without the reference to unlimited queues.
+
     /**
      * Returns the number of additional elements that this queue can ideally
      * (in the absence of memory or resource constraints) accept without
      * blocking. This is always equal to the initial capacity of this queue
      * less the current {@code size} of this queue.
-     *
+     * <p>
      * <p>Note that you <em>cannot</em> always tell if an attempt to insert
      * an element will succeed by inspecting {@code remainingCapacity}
      * because it may be the case that another thread is about to
@@ -451,7 +468,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      * elements.
      * Returns {@code true} if this queue contained the specified element
      * (or equivalently, if this queue changed as a result of the call).
-     *
+     * <p>
      * <p>Removal of interior elements in circular array based queues
      * is an intrinsically slow and disruptive operation, so should
      * be undertaken only in exceptional circumstances, ideally
@@ -505,11 +522,11 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
     /**
      * Returns an array containing all of the elements in this queue, in
      * proper sequence.
-     *
+     * <p>
      * <p>The returned array will be "safe" in that no references to it are
      * maintained by this queue.  (In other words, this method must allocate
      * a new array).  The caller is thus free to modify the returned array.
-     *
+     * <p>
      * <p>This method acts as bridge between array-based and collection-based
      * APIs.
      *
@@ -536,24 +553,24 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      * the specified array.  If the queue fits in the specified array, it
      * is returned therein.  Otherwise, a new array is allocated with the
      * runtime type of the specified array and the size of this queue.
-     *
+     * <p>
      * <p>If this queue fits in the specified array with room to spare
      * (i.e., the array has more elements than this queue), the element in
      * the array immediately following the end of the queue is set to
      * {@code null}.
-     *
+     * <p>
      * <p>Like the {@link #toArray()} method, this method acts as bridge between
      * array-based and collection-based APIs.  Further, this method allows
      * precise control over the runtime type of the output array, and may,
      * under certain circumstances, be used to save allocation costs.
-     *
+     * <p>
      * <p>Suppose {@code x} is a queue known to contain only strings.
      * The following code can be used to dump the queue into a newly
      * allocated array of {@code String}:
-     *
+     * <p>
      * <pre>
      *     String[] y = x.toArray(new String[0]);</pre>
-     *
+     * <p>
      * Note that {@code toArray(new Object[0])} is identical in function to
      * {@code toArray()}.
      *
@@ -561,9 +578,9 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      *          be stored, if it is big enough; otherwise, a new array of the
      *          same runtime type is allocated for this purpose
      * @return an array containing all of the elements in this queue
-     * @throws ArrayStoreException if the runtime type of the specified array
-     *         is not a supertype of the runtime type of every element in
-     *         this queue
+     * @throws ArrayStoreException  if the runtime type of the specified array
+     *                              is not a supertype of the runtime type of every element in
+     *                              this queue
      * @throws NullPointerException if the specified array is null
      */
     @SuppressWarnings("unchecked")
@@ -575,8 +592,8 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
             final int count = this.count;
             final int len = a.length;
             if (len < count)
-                a = (T[])java.lang.reflect.Array.newInstance(
-                    a.getClass().getComponentType(), count);
+                a = (T[]) java.lang.reflect.Array.newInstance(
+                        a.getClass().getComponentType(), count);
             for (int i = takeIndex, k = 0; k < count; i = inc(i), k++)
                 a[k] = (T) items[i];
             if (len > count)
@@ -703,7 +720,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
     /**
      * Returns an iterator over the elements in this queue in proper sequence.
      * The elements will be returned in order from first (head) to last (tail).
-     *
+     * <p>
      * <p>The returned {@code Iterator} is a "weakly consistent" iterator that
      * will never throw {@link java.util.ConcurrentModificationException
      * ConcurrentModificationException},
@@ -767,11 +784,10 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
                 if (x == null) {
                     x = nextItem;         // we are forced to report old value
                     lastItem = null;      // but ensure remove fails
-                }
-                else
+                } else
                     lastItem = x;
                 while (--remaining > 0 && // skip over nulls
-                       (nextItem = itemAt(nextIndex = inc(nextIndex))) == null)
+                        (nextItem = itemAt(nextIndex = inc(nextIndex))) == null)
                     ;
                 return x;
             } finally {

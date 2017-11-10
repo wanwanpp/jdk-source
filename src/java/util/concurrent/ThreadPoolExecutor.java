@@ -738,13 +738,13 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * from the queue during shutdown. The method is non-private to
      * allow access from ScheduledThreadPoolExecutor.
      */
-    //  1.shutdown状态，线程池和阻塞队列为空时
-    //  2.stop状态，线程池为空。
+    //  1.shutdown状态，线程池和阻塞队列为空时             shutdown是shutdown()方法调用后的状态。
+    //  2.stop状态，线程池为空。                                   stop是shutdownNow方法调用后的状态。
     final void tryTerminate() {
         for (; ; ) {
             int c = ctl.get();
             if (isRunning(c) ||
-                    runStateAtLeast(c, TIDYING) ||
+                    runStateAtLeast(c, TIDYING) ||            //表示已经关闭了
                     (runStateOf(c) == SHUTDOWN && !workQueue.isEmpty()))
                 return;
             if (workerCountOf(c) != 0) { // Eligible to terminate
@@ -839,6 +839,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         try {
             for (Worker w : workers) {
                 Thread t = w.thread;
+                //Worker继承了AbstractQueuedSynchronizer类。
                 if (!t.isInterrupted() && w.tryLock()) {       //w.tryWork()方法，若worker空闲就会返回true，否则为false。
                     try {
                         t.interrupt();
@@ -907,7 +908,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         BlockingQueue<Runnable> q = workQueue;
         List<Runnable> taskList = new ArrayList<Runnable>();
         q.drainTo(taskList);
-        if (!q.isEmpty()) {
+        if (!q.isEmpty()) {   //q的count为0则为空。           q为什么还可能不为空？？？
             for (Runnable r : q.toArray(new Runnable[0])) {
                 if (q.remove(r))
                     taskList.add(r);
@@ -1490,7 +1491,9 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         try {
             checkShutdownAccess();
             advanceRunState(STOP);
+            //中断所有的worker
             interruptWorkers();
+            //将workQueue中的任务放入tasks中，并清空workQueue。
             tasks = drainQueue();
         } finally {
             mainLock.unlock();
