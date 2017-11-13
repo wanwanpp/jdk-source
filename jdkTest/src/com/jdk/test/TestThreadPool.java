@@ -1,11 +1,9 @@
 package com.jdk.test;
 
-import java.util.concurrent.RunnableFuture;
-
 /**
  * Created by 王萍 on 2017/10/26 0026.
  */
-public class Test {
+public class TestThreadPool {
 
     public static void main(String[] args) {
 
