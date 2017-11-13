@@ -253,6 +253,7 @@ public final class Unsafe {
     /**
      * @see #putInt(Object, int, int)
      */
+    //直接修改内存数据，即便变量的修饰符为private也行。
     public native void putLong(Object o, long offset, long x);
 
     /**
@@ -631,6 +632,7 @@ public final class Unsafe {
      *
      * @since 1.7
      */
+    //复制内存数据。
     public native void copyMemory(Object srcBase, long srcOffset,
                                   Object destBase, long destOffset,
                                   long bytes);
@@ -653,6 +655,7 @@ public final class Unsafe {
      *
      * @see #allocateMemory
      */
+    //释放allocateMemory和reallocateMemory申请的内存。
     public native void freeMemory(long address);
 
     /// random queries
@@ -757,6 +760,7 @@ public final class Unsafe {
      *
      * @see #getInt(Object, long)
      */
+    //返回成员属性的内存地址相对于对象内存地址的偏移量。
     public native long objectFieldOffset(Field f);
 
     /**
@@ -967,6 +971,7 @@ public final class Unsafe {
      * Allocate an instance but do not run any constructor.
      * Initializes the class if it has not yet been.
      */
+    //生成一个对象实例，但是不调用构造方法。
     public native Object allocateInstance(Class cls)
             throws InstantiationException;
 
@@ -1000,6 +1005,7 @@ public final class Unsafe {
      *
      * @return <tt>true</tt> if successful
      */
+    //比较内存数据与预期值，相等则更新数据
     public final native boolean compareAndSwapObject(Object o, long offset,
                                                      Object expected,
                                                      Object x);
