@@ -938,6 +938,7 @@ public class Thread implements Runnable {
      * is reset or not based on the value of ClearInterrupted that is
      * passed.
      */
+    //ClearInterrupted表示是否恢复interrupted的标志位false。
     private native boolean isInterrupted(boolean ClearInterrupted);
 
     /**

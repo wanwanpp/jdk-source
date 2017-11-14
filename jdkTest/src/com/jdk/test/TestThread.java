@@ -10,16 +10,32 @@ import java.util.concurrent.TimeUnit;
 public class TestThread {
 
     //单元测试和main的测试不一样，单元测试中main函数做完了，就直接退出jvm了。
+//    @Test
+//    public void testJoin() throws InterruptedException {
+//        Thread previous = Thread.currentThread();
+//        for (int i = 0; i < 10; i++) {
+//            Thread thread = new Thread(new WorkThread(previous));
+//            thread.start();
+//            previous = thread;
+//        }
+//        TimeUnit.SECONDS.sleep(3);
+//        System.out.println(previous.isDaemon());
+//    }
+
     @Test
-    public void testJoin() throws InterruptedException {
-        Thread previous = Thread.currentThread();
-        for (int i = 0; i < 10; i++) {
-            Thread thread = new Thread(new WorkThread(previous));
-            thread.start();
-            previous = thread;
-        }
-        TimeUnit.SECONDS.sleep(3);
-        System.out.println(previous.isDaemon());
+    public void testInterrupt() throws InterruptedException {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (; ; ) ;
+            }
+        });
+        thread.start();
+        thread.interrupt();
+        Thread.sleep(1000);
+        System.out.println(thread.isInterrupted());
+        System.out.println(thread.isInterrupted());
+        System.out.println(thread.interrupted());
     }
 
     public static void main(String[] args) throws InterruptedException {
