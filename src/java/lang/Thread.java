@@ -1201,8 +1201,8 @@ public class Thread implements Runnable {
         }
 
         if (millis == 0) {
-            while (isAlive()) {  //判断线程是否还存活，本地方法
-                wait(0);       //调用Object的wait方法表示无限时等待，所有对象都是Object的子类。
+            while (isAlive()) {             //判断线程是否还存活，本地方法
+                wait(0);        //调用Object的wait方法表示无限时等待，所有对象都是Object的子类。
             }
         } else {
             while (isAlive()) {
