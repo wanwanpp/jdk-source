@@ -39,6 +39,8 @@ import java.security.ProtectionDomain;
  * @see #getUnsafe
  */
 //可以直接在任意内存地址处读写数据，对于普通用户来说，有一定的危险。
+
+
 public final class Unsafe {
 
     private static native void registerNatives();
