@@ -156,6 +156,7 @@ public class AtomicInteger extends Number implements java.io.Serializable {
      *
      * @return the previous value
      */
+    //自旋CAS
     public final int getAndIncrement() {
         for (;;) {
             int current = get();
