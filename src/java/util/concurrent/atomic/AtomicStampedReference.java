@@ -26,6 +26,8 @@ package java.util.concurrent.atomic;
  * @since 1.5
  */
 //引入时间戳解决CAS的ABA问题。
+//目标是A, 期望值也是A, 那么CAS操作会成功。但是这时候目标A可能不是原来的那个A了，
+// 它可能是A变成了B，再变成了A。所以叫ABA问题
 public class AtomicStampedReference<V> {
 
     //利用Pair类来记录对象引用和时间戳信息，时间戳应该自增。
@@ -85,6 +87,7 @@ public class AtomicStampedReference<V> {
      *                    {@code stampholder[0]} will hold the value of the stamp.
      * @return the current value of the reference
      */
+    //这个用法有点特别，传入stampHolder，将stamp的值放入这个stampHolder数组中。
     public V get(int[] stampHolder) {
         Pair<V> pair = this.pair;
         stampHolder[0] = pair.stamp;

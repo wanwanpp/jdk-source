@@ -34,26 +34,31 @@
  */
 
 package java.util.concurrent.atomic;
+
 import sun.misc.Unsafe;
-import java.util.*;
 
 /**
  * An {@code int} array in which elements may be updated atomically.
  * See the {@link java.util.concurrent.atomic} package
  * specification for description of the properties of atomic
  * variables.
- * @since 1.5
+ *
  * @author Doug Lea
+ * @since 1.5
  */
+//AtomicInteger的升级版，操作int数组。
 public class AtomicIntegerArray implements java.io.Serializable {
     private static final long serialVersionUID = 2862133569453604235L;
 
     private static final Unsafe unsafe = Unsafe.getUnsafe();
+    //获得第一个元素的偏移量offset，由于对象头的存在，并不是从0开始
     private static final int base = unsafe.arrayBaseOffset(int[].class);
+    // 移位操作的基数，用移位操作代替乘法
     private static final int shift;
     private final int[] array;
 
     static {
+        //得到数组中元素的长度。对于int[]数组， scale = 4
         int scale = unsafe.arrayIndexScale(int[].class);
         if ((scale & (scale - 1)) != 0)
             throw new Error("data type scale not a power of two");
@@ -66,8 +71,9 @@ public class AtomicIntegerArray implements java.io.Serializable {
 
         return byteOffset(i);
     }
-
+    // 用移位操作代替乘法，实际上求的是数组的第i个元素的偏移量，方便定位到数组元素的内存地址
     private static long byteOffset(int i) {
+//       说白了，就是  index * 元素长度  + base
         return ((long) i << shift) + base;
     }
 
@@ -119,7 +125,7 @@ public class AtomicIntegerArray implements java.io.Serializable {
     /**
      * Sets the element at position {@code i} to the given value.
      *
-     * @param i the index
+     * @param i        the index
      * @param newValue the new value
      */
     public final void set(int i, int newValue) {
@@ -129,7 +135,7 @@ public class AtomicIntegerArray implements java.io.Serializable {
     /**
      * Eventually sets the element at position {@code i} to the given value.
      *
-     * @param i the index
+     * @param i        the index
      * @param newValue the new value
      * @since 1.6
      */
@@ -141,7 +147,7 @@ public class AtomicIntegerArray implements java.io.Serializable {
      * Atomically sets the element at position {@code i} to the given
      * value and returns the old value.
      *
-     * @param i the index
+     * @param i        the index
      * @param newValue the new value
      * @return the previous value
      */
@@ -158,7 +164,7 @@ public class AtomicIntegerArray implements java.io.Serializable {
      * Atomically sets the element at position {@code i} to the given
      * updated value if the current value {@code ==} the expected value.
      *
-     * @param i the index
+     * @param i      the index
      * @param expect the expected value
      * @param update the new value
      * @return true if successful. False return indicates that
@@ -175,12 +181,12 @@ public class AtomicIntegerArray implements java.io.Serializable {
     /**
      * Atomically sets the element at position {@code i} to the given
      * updated value if the current value {@code ==} the expected value.
-     *
+     * <p>
      * <p>May <a href="package-summary.html#Spurious">fail spuriously</a>
      * and does not provide ordering guarantees, so is only rarely an
      * appropriate alternative to {@code compareAndSet}.
      *
-     * @param i the index
+     * @param i      the index
      * @param expect the expected value
      * @param update the new value
      * @return true if successful.
@@ -212,7 +218,7 @@ public class AtomicIntegerArray implements java.io.Serializable {
     /**
      * Atomically adds the given value to the element at index {@code i}.
      *
-     * @param i the index
+     * @param i     the index
      * @param delta the value to add
      * @return the previous value
      */
@@ -248,7 +254,7 @@ public class AtomicIntegerArray implements java.io.Serializable {
     /**
      * Atomically adds the given value to the element at index {@code i}.
      *
-     * @param i the index
+     * @param i     the index
      * @param delta the value to add
      * @return the updated value
      */
@@ -264,6 +270,7 @@ public class AtomicIntegerArray implements java.io.Serializable {
 
     /**
      * Returns the String representation of the current values of array.
+     *
      * @return the String representation of the current values of array
      */
     public String toString() {
