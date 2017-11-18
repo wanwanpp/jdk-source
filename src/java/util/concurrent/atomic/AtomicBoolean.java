@@ -134,6 +134,7 @@ public class AtomicBoolean implements java.io.Serializable {
      * @param newValue the new value
      * @since 1.6
      */
+    // 优化volatie变量的写，再不需要保证可见性的场景下使用lazySet来优化，减少内存屏障
     public final void lazySet(boolean newValue) {
         int v = newValue ? 1 : 0;
         unsafe.putOrderedInt(this, valueOffset, v);
