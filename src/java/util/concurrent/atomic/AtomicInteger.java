@@ -104,6 +104,14 @@ public class AtomicInteger extends Number implements java.io.Serializable {
      * @param newValue the new value
      * @since 1.6
      */
+    //相对于上面的set方法，其实都是对用volatile修饰的value属性的赋值。
+    //因为value用了volatile修饰，可以保证变量在线程间的可见性，set方法直接赋值修改。
+    //lazySet方法是绕着弯子的让value属性以普通变量的方式进行修改，即不保证可见性，相当于取消了volatile的作用。
+
+    //使用这种方式的目的是为了减少不必要的内存屏障，低级优化手段来提高性能。
+    //如：在Lock.lock()方法获得锁时，会使cpu缓存失效，从主存中读取变量。
+    //Lock.unlock()时，会将缓存中的数据写回到主存中。
+    //这两个操作锁相关的操作已经保证了可见性，因此可以将volatile修饰的变量通过lazySet以非volatile的方式修改变量，减少内存屏障，做到优化。
     public final void lazySet(int newValue) {
         unsafe.putOrderedInt(this, valueOffset, newValue);
     }
@@ -114,6 +122,7 @@ public class AtomicInteger extends Number implements java.io.Serializable {
      * @param newValue the new value
      * @return the previous value
      */
+    //利用CAS使用无锁的方式读取并设置。
     public final int getAndSet(int newValue) {
         for (;;) {
             int current = get();
@@ -147,6 +156,7 @@ public class AtomicInteger extends Number implements java.io.Serializable {
      * @param update the new value
      * @return true if successful.
      */
+    //目前和上面的compareAndSet方法的实现是一样的。弱化版本的CAS操作。
     public final boolean weakCompareAndSet(int expect, int update) {
         return unsafe.compareAndSwapInt(this, valueOffset, expect, update);
     }

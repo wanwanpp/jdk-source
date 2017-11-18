@@ -34,7 +34,6 @@
  */
 
 package java.util.concurrent.locks;
-import java.util.concurrent.*;
 import sun.misc.Unsafe;
 
 
@@ -117,6 +116,12 @@ import sun.misc.Unsafe;
  * }}</pre>
  */
 
+/**
+ * LockSupport的park()和unpark()方法和Object.wait(), notify方法都可以操作线程的等待和唤醒，但是两者主要有两个区别
+ 1. 面向的主体不同，LockSupport的park, unpark面向的是线程，而Object.wait, nofify面向的是对象
+ 2. 底层实现机制不同，可以看到Object的wait, notify方法也是native方法，Unsafe的park和unpark方法也是native方法，
+    底层实现不同，Object.notify不能唤醒Unsafe park的线程。
+ */
 public class LockSupport {
     private LockSupport() {} // Cannot be instantiated.
 
@@ -131,8 +136,14 @@ public class LockSupport {
         } catch (Exception ex) { throw new Error(ex); }
     }
 
+    //给Thread对象的parkBlocker属性赋值。
     private static void setBlocker(Thread t, Object arg) {
         // Even though volatile, hotspot doesn't need a write barrier here.
+        /**
+         * t为需要操作的线程对象。
+         * parkBlockerOffset表示parkBlocker字段在Thread类中内存地址的offset
+         * arg为需要给当前线程对象t的parkBlocker属性赋的值。
+         */
         unsafe.putObject(t, parkBlockerOffset, arg);
     }
 
@@ -180,6 +191,8 @@ public class LockSupport {
      *        thread parking
      * @since 1.6
      */
+    //标记当前线程在哪个锁对象（blocker）上等待。
+    //jstack能打印出线程是在哪个对象上block，这个对象就是这里的blocker
     public static void park(Object blocker) {
         Thread t = Thread.currentThread();
         setBlocker(t, blocker);

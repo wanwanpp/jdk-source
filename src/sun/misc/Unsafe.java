@@ -39,8 +39,7 @@ import java.security.ProtectionDomain;
  * @see #getUnsafe
  */
 //可以直接在任意内存地址处读写数据，对于普通用户来说，有一定的危险。
-
-
+//大部分是native方法，提供了操作系统层面的操作，方便的像c++一样操作内存。
 public final class Unsafe {
 
     private static native void registerNatives();
@@ -763,6 +762,7 @@ public final class Unsafe {
      * @see #getInt(Object, long)
      */
     //返回成员属性的内存地址相对于对象内存地址的偏移量。
+    //通过这个方法得到offset后，就可以通过对象的引用来找到字段的实际内存地址。
     public native long objectFieldOffset(Field f);
 
     /**
@@ -1008,6 +1008,7 @@ public final class Unsafe {
      * @return <tt>true</tt> if successful
      */
     //比较内存数据与预期值，相等则更新数据
+    //对对象引用进行CAS（CompareAndSwap）
     public final native boolean compareAndSwapObject(Object o, long offset,
                                                      Object expected,
                                                      Object x);
@@ -1097,6 +1098,7 @@ public final class Unsafe {
     /**
      * Volatile version of {@link #getLong(Object, long)}
      */
+    //可获取volatile变量的值
     public native long getLongVolatile(Object o, long offset);
 
     /**
@@ -1155,6 +1157,7 @@ public final class Unsafe {
      *
      * @param thread the thread to unpark.
      */
+    //唤醒等待的线程，Condition的signal方法就是基于unpark实现的
     public native void unpark(Object thread);
 
     /**
@@ -1168,6 +1171,10 @@ public final class Unsafe {
      * because <tt>unpark</tt> is, so it would be strange to place it
      * elsewhere.
      */
+    //第一个参数isAbsolute是表示用绝对时间还是相对事件，如果是绝对时间，就等待直到time，
+    // 比如Condition接口的awaitUntil(Date deadline)。isAbsolute为false时，等待一个时间间隔
+
+    //让当前线程进行等待，并释放锁。
     public native void park(boolean isAbsolute, long time);
 
     /**
