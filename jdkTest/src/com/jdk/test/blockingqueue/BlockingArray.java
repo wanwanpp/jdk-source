@@ -1,5 +1,10 @@
-package com.jdk.test.blockingQueue;
+package com.jdk.test.blockingqueue;
 
+/**
+ * @author 王萍
+ * @date 2017/11/19
+ * @param <T>
+ */
 public class BlockingArray<T> {
     private final T[] array;  
       

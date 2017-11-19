@@ -385,10 +385,12 @@ public abstract class AbstractQueuedSynchronizer
     static final class Node {
         /**
          * Marker to indicate a node is waiting in shared mode
+         * 共享模式
          */
         static final Node SHARED = new Node();
         /**
          * Marker to indicate a node is waiting in exclusive mode
+         * 独占模式
          */
         static final Node EXCLUSIVE = null;
 
@@ -444,6 +446,7 @@ public abstract class AbstractQueuedSynchronizer
          * CONDITION for condition nodes.  It is modified using CAS
          * (or when possible, unconditional volatile writes).
          */
+        //等待状态
         volatile int waitStatus;
 
         /**
@@ -457,6 +460,7 @@ public abstract class AbstractQueuedSynchronizer
          * cancelled thread never succeeds in acquiring, and a thread only
          * cancels itself, not any other node.
          */
+        //队列中前一个节点
         volatile Node prev;
 
         /**
@@ -472,12 +476,14 @@ public abstract class AbstractQueuedSynchronizer
          * point to the node itself instead of null, to make life
          * easier for isOnSyncQueue.
          */
+        //队列中下一个节点
         volatile Node next;
 
         /**
          * The thread that enqueued this node.  Initialized on
          * construction and nulled out after use.
          */
+        //线程引用
         volatile Thread thread;
 
         /**
@@ -490,6 +496,7 @@ public abstract class AbstractQueuedSynchronizer
          * we save a field by using special value to indicate shared
          * mode.
          */
+        //指向条件队列中下一个等待的节点，给条件队列使用的，条件队列只有在独享模式下才使用
         Node nextWaiter;
 
         /**
@@ -599,6 +606,7 @@ public abstract class AbstractQueuedSynchronizer
      * @param node the node to insert
      * @return node's predecessor
      */
+    //返回前置节点
     private Node enq(final Node node) {
         for (; ; ) {
             Node t = tail;
@@ -1093,6 +1101,8 @@ public abstract class AbstractQueuedSynchronizer
      *                                       correctly.
      * @throws UnsupportedOperationException if exclusive mode is not supported
      */
+    //
+    //子类实现。
     protected boolean tryAcquire(int arg) {
         throw new UnsupportedOperationException();
     }
@@ -1696,6 +1706,7 @@ public abstract class AbstractQueuedSynchronizer
         /*
          * If cannot change waitStatus, the node has been cancelled.
          */
+        //当node被cancel时，会return false。
         if (!compareAndSetWaitStatus(node, Node.CONDITION, 0))
             return false;
 
@@ -1706,6 +1717,7 @@ public abstract class AbstractQueuedSynchronizer
          * case the waitStatus can be transiently and harmlessly wrong).
          */
         Node p = enq(node);
+        //当前节点前置节点的状态。
         int ws = p.waitStatus;
         if (ws > 0 || !compareAndSetWaitStatus(p, ws, Node.SIGNAL))
             LockSupport.unpark(node.thread);
@@ -1860,10 +1872,12 @@ public abstract class AbstractQueuedSynchronizer
         private static final long serialVersionUID = 1173984872572414699L;
         /**
          * First node of condition queue.
+         * 条件队列的队首节点
          */
         private transient Node firstWaiter;
         /**
          * Last node of condition queue.
+         * 条件队列的队尾节点
          */
         private transient Node lastWaiter;
 
@@ -1879,7 +1893,10 @@ public abstract class AbstractQueuedSynchronizer
          * Adds a new waiter to wait queue.
          *
          * @return its new wait node
+         * 判断尾节点的状态是不是等待某个条件的状态(CONDITION)，如果不是，
+         * 就把CANCELLED节点从队列中踢出，然后把自己标记为尾节点。
          */
+
         private Node addConditionWaiter() {
             Node t = lastWaiter;
             // If lastWaiter is cancelled, clean out.
@@ -1887,6 +1904,7 @@ public abstract class AbstractQueuedSynchronizer
                 unlinkCancelledWaiters();
                 t = lastWaiter;
             }
+            //根据当前线程创建新节点
             Node node = new Node(Thread.currentThread(), Node.CONDITION);
             if (t == null)
                 firstWaiter = node;
@@ -1903,6 +1921,9 @@ public abstract class AbstractQueuedSynchronizer
          *
          * @param first (non-null) the first node on condition queue
          */
+        //实际上doSignal只是把一个节点从条件队列中移除，然后加入到同步队列，并设置它在同步队列的前置节点
+        // 的waitStatus = SIGNAL, 如果设置失败或者取消在条件队列等待，直接把这个节点的线程unpark唤醒，
+        // 需要注意的是unpark操作只是把线程从等待状态转化为可运行状态，并不直接获得锁。
         private void doSignal(Node first) {
             do {
                 if ((firstWaiter = first.nextWaiter) == null)
@@ -1971,7 +1992,7 @@ public abstract class AbstractQueuedSynchronizer
          *                                      returns {@code false}
          */
         public final void signal() {
-            if (!isHeldExclusively())
+            if (!isHeldExclusively())  //如果不是独占模式，就抛出异常。
                 throw new IllegalMonitorStateException();
             Node first = firstWaiter;
             if (first != null)

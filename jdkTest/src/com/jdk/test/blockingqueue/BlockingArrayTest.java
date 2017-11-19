@@ -1,8 +1,12 @@
-package com.jdk.test.blockingQueue;
+package com.jdk.test.blockingqueue;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 //控制台的打印顺序有可能不对，1000可能打印在了中间。
+/**
+ * @author 王萍
+ * @date 2017/11/19
+ */
 public class BlockingArrayTest {
     public static void main(String[] args){  
         final BlockingArray<Integer> blockingArray = new BlockingArray<Integer>(10);
