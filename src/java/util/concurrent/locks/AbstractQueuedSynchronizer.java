@@ -35,11 +35,13 @@
 
 package java.util.concurrent.locks;
 
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.*;
-
 import sun.misc.Unsafe;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides a framework for implementing blocking locks and related
@@ -659,8 +661,9 @@ public abstract class AbstractQueuedSynchronizer
          * fails or if status is changed by waiting thread.
          */
         int ws = node.waitStatus;
-        if (ws < 0)
+        if (ws < 0) {
             compareAndSetWaitStatus(node, ws, 0);
+        }
 
         /*
          * Thread to unpark is held in successor, which is normally
@@ -1714,8 +1717,7 @@ public abstract class AbstractQueuedSynchronizer
      * wait. Returns true if thread was cancelled before being
      * signalled.
      *
-     * @param current the waiting thread
-     * @param node    its node
+     * @param node its node
      * @return true if cancelled before the node was signalled
      */
     final boolean transferAfterCancelledWait(Node node) {

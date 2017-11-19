@@ -144,8 +144,9 @@ public class ThreadLocal<T> {
         ThreadLocalMap map = getMap(t);
         if (map != null) {
             ThreadLocalMap.Entry e = map.getEntry(this);
-            if (e != null)
-                return (T)e.value;
+            if (e != null) {
+                return (T) e.value;
+            }
         }
         return setInitialValue();
     }
@@ -160,10 +161,11 @@ public class ThreadLocal<T> {
         T value = initialValue();
         Thread t = Thread.currentThread();
         ThreadLocalMap map = getMap(t);
-        if (map != null)
+        if (map != null) {
             map.set(this, value);
-        else
+        } else {
             createMap(t, value);
+        }
         return value;
     }
 
@@ -219,7 +221,6 @@ public class ThreadLocal<T> {
      *
      * @param t the current thread
      * @param firstValue value for the initial entry of the map
-     * @param map the map to store.
      */
     void createMap(Thread t, T firstValue) {
         t.threadLocals = new ThreadLocalMap(this, firstValue);
