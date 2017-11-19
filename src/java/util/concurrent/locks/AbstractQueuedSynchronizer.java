@@ -617,6 +617,7 @@ public abstract class AbstractQueuedSynchronizer
                 node.prev = t;
                 if (compareAndSetTail(t, node)) {
                     t.next = node;
+                    //只有这里能够返回。
                     return t;
                 }
             }
@@ -629,9 +630,11 @@ public abstract class AbstractQueuedSynchronizer
      * @param mode Node.EXCLUSIVE for exclusive, Node.SHARED for shared
      * @return the new node
      */
+    //返回刚添加的新节点
     private Node addWaiter(Node mode) {
         Node node = new Node(Thread.currentThread(), mode);
         // Try the fast path of enq; backup to full enq on failure
+        //快速尝试添加，不行则到enq方法中死循环知道添加成功。
         Node pred = tail;
         if (pred != null) {
             node.prev = pred;
@@ -817,24 +820,26 @@ public abstract class AbstractQueuedSynchronizer
      * @param node the node
      * @return {@code true} if thread should block
      */
+    //判断是否需要park当前线程
     private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
         int ws = pred.waitStatus;
-        if (ws == Node.SIGNAL)
+        if (ws == Node.SIGNAL)  //signal状态，说明当前节点需要被park，直到前驱结点释放后将当前节点唤醒。
             /*
              * This node has already set status asking a release
              * to signal it, so it can safely park.
              */
             return true;
-        if (ws > 0) {
+        if (ws > 0) {//cancel状态。跳过这些cancel的节点
             /*
              * Predecessor was cancelled. Skip over predecessors and
              * indicate retry.
              */
+            //前置节点被cancel
             do {
                 node.prev = pred = pred.prev;
             } while (pred.waitStatus > 0);
             pred.next = node;
-        } else {
+        } else {//waitStatus must be 0 or PROPAGATE
             /*
              * waitStatus must be 0 or PROPAGATE.  Indicate that we
              * need a signal, but don't park yet.  Caller will need to
@@ -883,6 +888,7 @@ public abstract class AbstractQueuedSynchronizer
         boolean failed = true;
         try {
             boolean interrupted = false;
+            //循环检查是否满足条件。
             for (; ; ) {
                 final Node p = node.predecessor();
                 if (p == head && tryAcquire(arg)) {
@@ -891,6 +897,7 @@ public abstract class AbstractQueuedSynchronizer
                     failed = false;
                     return interrupted;
                 }
+                //满足park条件的线程将在parkAndCheckInterrupt()方法中park，线程从park中返回后还是在这个循环中执行，继续获取同步状态。
                 if (shouldParkAfterFailedAcquire(p, node) &&
                         parkAndCheckInterrupt())
                     interrupted = true;
@@ -1226,6 +1233,9 @@ public abstract class AbstractQueuedSynchronizer
      *            can represent anything you like.
      */
     public final void acquire(int arg) {
+        //    1.获取同步状态
+        //    2.失败则构造同步节点并加入同步队列的尾部
+        //    3.以死循环的方式来获取同步状态。
         if (!tryAcquire(arg) &&
                 acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
             selfInterrupt();
@@ -1720,6 +1730,7 @@ public abstract class AbstractQueuedSynchronizer
         //当前节点前置节点的状态。
         int ws = p.waitStatus;
         if (ws > 0 || !compareAndSetWaitStatus(p, ws, Node.SIGNAL))
+            //将线程从阻塞状态转为runnable状态。
             LockSupport.unpark(node.thread);
         return true;
     }

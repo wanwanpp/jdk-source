@@ -194,8 +194,10 @@ public class LockSupport {
     //标记当前线程在哪个锁对象（blocker）上等待。
     //jstack能打印出线程是在哪个对象上block，这个对象就是这里的blocker
     public static void park(Object blocker) {
+        //先给当前线程设置blocker，再将线程park掉。
         Thread t = Thread.currentThread();
         setBlocker(t, blocker);
+        //当Unsafe的park方法返回时表示已经退出等待，就把blocker设置为null.
         unsafe.park(false, 0L);
         setBlocker(t, null);
     }
