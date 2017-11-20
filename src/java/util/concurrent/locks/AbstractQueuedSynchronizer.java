@@ -667,6 +667,7 @@ public abstract class AbstractQueuedSynchronizer
      *
      * @param node the node
      */
+    //唤醒后继节点
     private void unparkSuccessor(Node node) {
         /*
          * If status is negative (i.e., possibly needing signal) try
@@ -855,6 +856,7 @@ public abstract class AbstractQueuedSynchronizer
     /**
      * Convenience method to interrupt current thread.
      */
+    //中断当前线程
     private static void selfInterrupt() {
         Thread.currentThread().interrupt();
     }
@@ -864,6 +866,7 @@ public abstract class AbstractQueuedSynchronizer
      *
      * @return {@code true} if interrupted
      */
+    //阻塞当前线程并返回是否被中断的状态。
     private final boolean parkAndCheckInterrupt() {
         LockSupport.park(this);
         return Thread.interrupted();
@@ -886,6 +889,7 @@ public abstract class AbstractQueuedSynchronizer
      * @param arg  the acquire argument
      * @return {@code true} if interrupted while waiting
      */
+    //在独占不可中断模式下，队列中的线程获取同步状态
     final boolean acquireQueued(final Node node, int arg) {
         boolean failed = true;
         try {
@@ -915,6 +919,7 @@ public abstract class AbstractQueuedSynchronizer
      *
      * @param arg the acquire argument
      */
+    //在独占可中断模式下获取同步状态。
     private void doAcquireInterruptibly(int arg)
             throws InterruptedException {
         final Node node = addWaiter(Node.EXCLUSIVE);
@@ -945,6 +950,7 @@ public abstract class AbstractQueuedSynchronizer
      * @param nanosTimeout max wait time
      * @return {@code true} if acquired
      */
+    //独占计时状态下获取同步状态
     private boolean doAcquireNanos(int arg, long nanosTimeout)
             throws InterruptedException {
         long lastTime = System.nanoTime();
@@ -981,6 +987,7 @@ public abstract class AbstractQueuedSynchronizer
      *
      * @param arg the acquire argument
      */
+    //共享不可中断模式下获取同步状态
     private void doAcquireShared(int arg) {
         final Node node = addWaiter(Node.SHARED);
         boolean failed = true;
@@ -1014,6 +1021,7 @@ public abstract class AbstractQueuedSynchronizer
      *
      * @param arg the acquire argument
      */
+    //共享可中断模式下获取同步状态
     private void doAcquireSharedInterruptibly(int arg)
             throws InterruptedException {
         final Node node = addWaiter(Node.SHARED);
