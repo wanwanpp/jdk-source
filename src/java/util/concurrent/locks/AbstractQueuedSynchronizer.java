@@ -560,6 +560,7 @@ public abstract class AbstractQueuedSynchronizer
      *
      * @return current state value
      */
+    //获取当前的同步状态
     protected final int getState() {
         return state;
     }
@@ -586,6 +587,7 @@ public abstract class AbstractQueuedSynchronizer
      * @return true if successful. False return indicates that the actual
      * value was not equal to the expected value.
      */
+    //原子操作state的值
     protected final boolean compareAndSetState(int expect, int update) {
         // See below for intrinsics setup to support this
         return unsafe.compareAndSwapInt(this, stateOffset, expect, update);
