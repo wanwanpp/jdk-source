@@ -34,9 +34,8 @@
  */
 
 package java.util.concurrent.locks;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 
 /**
  * An implementation of {@link ReadWriteLock} supporting similar
@@ -262,14 +261,19 @@ public class ReentrantReadWriteLock
          * and the upper the shared (reader) hold count.
          */
 
+        //同步状态state被分为两部分，高16位表示读锁的获取状态，低16位表示写锁的获取状态。
+
         static final int SHARED_SHIFT   = 16;
         static final int SHARED_UNIT    = (1 << SHARED_SHIFT);
         static final int MAX_COUNT      = (1 << SHARED_SHIFT) - 1;
+        //  1111111111111111    16个1.
         static final int EXCLUSIVE_MASK = (1 << SHARED_SHIFT) - 1;
 
         /** Returns the number of shared holds represented in count  */
+        //读锁被获取的次数，共享锁，可多个线程获取。
         static int sharedCount(int c)    { return c >>> SHARED_SHIFT; }
         /** Returns the number of exclusive holds represented in count  */
+        //写锁重入的次数，独占锁
         static int exclusiveCount(int c) { return c & EXCLUSIVE_MASK; }
 
         /**
@@ -298,6 +302,7 @@ public class ReentrantReadWriteLock
          * Initialized only in constructor and readObject.
          * Removed whenever a thread's read hold count drops to 0.
          */
+        //当前线程获取的读锁的次数
         private transient ThreadLocalHoldCounter readHolds;
 
         /**
@@ -369,6 +374,7 @@ public class ReentrantReadWriteLock
          * condition wait and re-established in tryAcquire.
          */
 
+        //释放写锁
         protected final boolean tryRelease(int releases) {
             if (!isHeldExclusively())
                 throw new IllegalMonitorStateException();
@@ -380,6 +386,7 @@ public class ReentrantReadWriteLock
             return free;
         }
 
+        //写锁获取同步状态
         protected final boolean tryAcquire(int acquires) {
             /*
              * Walkthrough:
@@ -397,6 +404,10 @@ public class ReentrantReadWriteLock
             int w = exclusiveCount(c);
             if (c != 0) {
                 // (Note: if c != 0 and w == 0 then shared count != 0)
+                //如果存在读锁（c!=0&&w==0），或者当前线程不是已经获取写锁的线程。返回false
+
+                //这里确保了获取写锁时，一定没有读锁，因为写锁要保证修改后的可见性，
+                // 所以同时不能有其他的读写操作。加上写锁后，其他线程需要被阻塞。
                 if (w == 0 || current != getExclusiveOwnerThread())
                     return false;
                 if (w + exclusiveCount(acquires) > MAX_COUNT)
@@ -405,6 +416,7 @@ public class ReentrantReadWriteLock
                 setState(c + acquires);
                 return true;
             }
+            //  下面是c==0的情况，即没有任何线程获取过读写锁。
             if (writerShouldBlock() ||
                 !compareAndSetState(c, c + acquires))
                 return false;
