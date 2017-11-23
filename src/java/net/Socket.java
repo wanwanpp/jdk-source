@@ -25,14 +25,13 @@
 
 package java.net;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.nio.channels.SocketChannel;
 import java.security.AccessController;
-import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 
 /**
  * This class implements client sockets (also called just
@@ -1144,6 +1143,7 @@ class Socket implements java.io.Closeable {
      * @see #getSendBufferSize()
      * @since 1.2
      */
+    //设置发送缓存区的大小
     public synchronized void setSendBufferSize(int size)
     throws SocketException{
         if (!(size > 0)) {
@@ -1216,6 +1216,7 @@ class Socket implements java.io.Closeable {
      * @see ServerSocket#setReceiveBufferSize(int)
      * @since 1.2
      */
+    //获取接受缓冲区的大小。
     public synchronized void setReceiveBufferSize(int size)
     throws SocketException{
         if (size <= 0) {
