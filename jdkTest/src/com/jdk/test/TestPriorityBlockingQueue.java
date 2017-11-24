@@ -5,8 +5,8 @@ import java.util.concurrent.PriorityBlockingQueue;
 /**
  * @author 王萍
  * @date 2017/11/24 0024
+ * 可以看出PriorityBlockingQueue维护的是一个最小堆。
  */
-//可以看出PriorityBlockingQueue维护的是一个最小堆。
 public class TestPriorityBlockingQueue {
     public static void main(String[] args) {
 
@@ -20,6 +20,7 @@ public class TestPriorityBlockingQueue {
     }
 }
 
+//age决定优先级。
 class Student implements Comparable<Student> {
     private String name;
     private Integer age;
