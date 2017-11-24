@@ -544,6 +544,7 @@ class Socket implements java.io.Closeable {
      * @since 1.4
      * @spec JSR-51
      */
+    //设置了连接超时时间。
     public void connect(SocketAddress endpoint, int timeout) throws IOException {
         if (endpoint == null)
             throw new IllegalArgumentException("connect: The address can't be null");
@@ -1091,6 +1092,7 @@ class Socket implements java.io.Closeable {
      * @since   JDK 1.1
      * @see #getSoTimeout()
      */
+    //设置读超时时间                   写超时不用设置，写操作基于tcp的超时重传机制，有自己的超时机制设置，Socket没有提供设置写超时方法。
     public synchronized void setSoTimeout(int timeout) throws SocketException {
         if (isClosed())
             throw new SocketException("Socket is closed");

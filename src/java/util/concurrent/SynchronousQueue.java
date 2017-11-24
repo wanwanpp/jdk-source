@@ -1,32 +1,4 @@
 /*
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
-/*
- *
- *
- *
- *
  *
  * Written by Doug Lea, Bill Scherer, and Michael Scott with
  * assistance from members of JCP JSR-166 Expert Group and released to
@@ -35,9 +7,13 @@
  */
 
 package java.util.concurrent;
-import java.util.concurrent.locks.*;
-import java.util.concurrent.atomic.*;
-import java.util.*;
+
+import java.util.AbstractQueue;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.concurrent.locks.LockSupport;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A {@linkplain BlockingQueue blocking queue} in which each insert
@@ -55,32 +31,32 @@ import java.util.*;
  * <tt>Collection</tt> methods (for example <tt>contains</tt>), a
  * <tt>SynchronousQueue</tt> acts as an empty collection.  This queue
  * does not permit <tt>null</tt> elements.
- *
+ * <p>
  * <p>Synchronous queues are similar to rendezvous channels used in
  * CSP and Ada. They are well suited for handoff designs, in which an
  * object running in one thread must sync up with an object running
  * in another thread in order to hand it some information, event, or
  * task.
- *
+ * <p>
  * <p> This class supports an optional fairness policy for ordering
  * waiting producer and consumer threads.  By default, this ordering
  * is not guaranteed. However, a queue constructed with fairness set
  * to <tt>true</tt> grants threads access in FIFO order.
- *
+ * <p>
  * <p>This class and its iterator implement all of the
  * <em>optional</em> methods of the {@link Collection} and {@link
  * Iterator} interfaces.
- *
+ * <p>
  * <p>This class is a member of the
  * <a href="{@docRoot}/../technotes/guides/collections/index.html">
  * Java Collections Framework</a>.
  *
- * @since 1.5
- * @author Doug Lea and Bill Scherer and Michael Scott
  * @param <E> the type of elements held in this collection
+ * @author Doug Lea and Bill Scherer and Michael Scott
+ * @since 1.5
  */
 public class SynchronousQueue<E> extends AbstractQueue<E>
-    implements BlockingQueue<E>, java.io.Serializable {
+        implements BlockingQueue<E>, java.io.Serializable {
     private static final long serialVersionUID = -3223113410248163686L;
 
     /*
@@ -167,20 +143,22 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
         /**
          * Performs a put or take.
          *
-         * @param e if non-null, the item to be handed to a consumer;
-         *          if null, requests that transfer return an item
-         *          offered by producer.
+         * @param e     if non-null, the item to be handed to a consumer;
+         *              if null, requests that transfer return an item
+         *              offered by producer.
          * @param timed if this operation should timeout
          * @param nanos the timeout, in nanoseconds
          * @return if non-null, the item provided or received; if null,
-         *         the operation failed due to timeout or interrupt --
-         *         the caller can distinguish which of these occurred
-         *         by checking Thread.interrupted.
+         * the operation failed due to timeout or interrupt --
+         * the caller can distinguish which of these occurred
+         * by checking Thread.interrupted.
          */
         abstract Object transfer(Object e, boolean timed, long nanos);
     }
 
-    /** The number of CPUs, for spin control */
+    /**
+     * The number of CPUs, for spin control
+     */
     static final int NCPUS = Runtime.getRuntime().availableProcessors();
 
     /**
@@ -205,7 +183,9 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
      */
     static final long spinForTimeoutThreshold = 1000L;
 
-    /** Dual stack */
+    /**
+     * Dual stack
+     */
     static final class TransferStack extends Transferer {
         /*
          * This extends Scherer-Scott dual stack algorithm, differing,
@@ -216,17 +196,29 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
          */
 
         /* Modes for SNodes, ORed together in node fields */
-        /** Node represents an unfulfilled consumer */
-        static final int REQUEST    = 0;
-        /** Node represents an unfulfilled producer */
-        static final int DATA       = 1;
-        /** Node is fulfilling another unfulfilled DATA or REQUEST */
+        /**
+         * Node represents an unfulfilled consumer
+         */
+        static final int REQUEST = 0;
+        /**
+         * Node represents an unfulfilled producer
+         */
+        static final int DATA = 1;
+        /**
+         * Node is fulfilling another unfulfilled DATA or REQUEST
+         */
         static final int FULFILLING = 2;
 
-        /** Return true if m has fulfilling bit set */
-        static boolean isFulfilling(int m) { return (m & FULFILLING) != 0; }
+        /**
+         * Return true if m has fulfilling bit set
+         */
+        static boolean isFulfilling(int m) {
+            return (m & FULFILLING) != 0;
+        }
 
-        /** Node class for TransferStacks. */
+        /**
+         * Node class for TransferStacks.
+         */
         static final class SNode {
             volatile SNode next;        // next node in stack
             volatile SNode match;       // the node matched to this
@@ -243,7 +235,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
 
             boolean casNext(SNode cmp, SNode val) {
                 return cmp == next &&
-                    UNSAFE.compareAndSwapObject(this, nextOffset, cmp, val);
+                        UNSAFE.compareAndSwapObject(this, nextOffset, cmp, val);
             }
 
             /**
@@ -256,7 +248,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
              */
             boolean tryMatch(SNode s) {
                 if (match == null &&
-                    UNSAFE.compareAndSwapObject(this, matchOffset, null, s)) {
+                        UNSAFE.compareAndSwapObject(this, matchOffset, null, s)) {
                     Thread w = waiter;
                     if (w != null) {    // waiters need at most one unpark
                         waiter = null;
@@ -288,21 +280,23 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
                     UNSAFE = sun.misc.Unsafe.getUnsafe();
                     Class k = SNode.class;
                     matchOffset = UNSAFE.objectFieldOffset
-                        (k.getDeclaredField("match"));
+                            (k.getDeclaredField("match"));
                     nextOffset = UNSAFE.objectFieldOffset
-                        (k.getDeclaredField("next"));
+                            (k.getDeclaredField("next"));
                 } catch (Exception e) {
                     throw new Error(e);
                 }
             }
         }
 
-        /** The head (top) of the stack */
+        /**
+         * The head (top) of the stack
+         */
         volatile SNode head;
 
         boolean casHead(SNode h, SNode nh) {
             return h == head &&
-                UNSAFE.compareAndSwapObject(this, headOffset, h, nh);
+                    UNSAFE.compareAndSwapObject(this, headOffset, h, nh);
         }
 
         /**
@@ -347,7 +341,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
             SNode s = null; // constructed/reused as needed
             int mode = (e == null) ? REQUEST : DATA;
 
-            for (;;) {
+            for (; ; ) {
                 SNode h = head;
                 if (h == null || h.mode == mode) {  // empty or same-mode
                     if (timed && nanos <= 0) {      // can't wait
@@ -368,8 +362,8 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
                 } else if (!isFulfilling(h.mode)) { // try to fulfill
                     if (h.isCancelled())            // already cancelled
                         casHead(h, h.next);         // pop and retry
-                    else if (casHead(h, s=snode(s, e, h, FULFILLING|mode))) {
-                        for (;;) { // loop until matched or waiters disappear
+                    else if (casHead(h, s = snode(s, e, h, FULFILLING | mode))) {
+                        for (; ; ) { // loop until matched or waiters disappear
                             SNode m = s.next;       // m is s's match
                             if (m == null) {        // all waiters are gone
                                 casHead(s, null);   // pop fulfill node
@@ -402,7 +396,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
         /**
          * Spins/blocks until node s is matched by a fulfill operation.
          *
-         * @param s the waiting node
+         * @param s     the waiting node
          * @param timed true if timed wait
          * @param nanos timeout value
          * @return matched node, or s if cancelled
@@ -434,8 +428,8 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
             Thread w = Thread.currentThread();
             SNode h = head;
             int spins = (shouldSpin(s) ?
-                         (timed ? maxTimedSpins : maxUntimedSpins) : 0);
-            for (;;) {
+                    (timed ? maxTimedSpins : maxUntimedSpins) : 0);
+            for (; ; ) {
                 if (w.isInterrupted())
                     s.tryCancel();
                 SNode m = s.match;
@@ -451,7 +445,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
                     }
                 }
                 if (spins > 0)
-                    spins = shouldSpin(s) ? (spins-1) : 0;
+                    spins = shouldSpin(s) ? (spins - 1) : 0;
                 else if (s.waiter == null)
                     s.waiter = w; // establish waiter so can park next iter
                 else if (!timed)
@@ -510,19 +504,22 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
         // Unsafe mechanics
         private static final sun.misc.Unsafe UNSAFE;
         private static final long headOffset;
+
         static {
             try {
                 UNSAFE = sun.misc.Unsafe.getUnsafe();
                 Class k = TransferStack.class;
                 headOffset = UNSAFE.objectFieldOffset
-                    (k.getDeclaredField("head"));
+                        (k.getDeclaredField("head"));
             } catch (Exception e) {
                 throw new Error(e);
             }
         }
     }
 
-    /** Dual Queue */
+    /**
+     * Dual Queue
+     */
     static final class TransferQueue extends Transferer {
         /*
          * This extends Scherer-Scott dual queue algorithm, differing,
@@ -533,7 +530,9 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
          * from non-null to null (for put) or vice versa (for take).
          */
 
-        /** Node class for TransferQueue. */
+        /**
+         * Node class for TransferQueue.
+         */
         static final class QNode {
             volatile QNode next;          // next node in queue
             volatile Object item;         // CAS'ed to or from null
@@ -547,12 +546,12 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
 
             boolean casNext(QNode cmp, QNode val) {
                 return next == cmp &&
-                    UNSAFE.compareAndSwapObject(this, nextOffset, cmp, val);
+                        UNSAFE.compareAndSwapObject(this, nextOffset, cmp, val);
             }
 
             boolean casItem(Object cmp, Object val) {
                 return item == cmp &&
-                    UNSAFE.compareAndSwapObject(this, itemOffset, cmp, val);
+                        UNSAFE.compareAndSwapObject(this, itemOffset, cmp, val);
             }
 
             /**
@@ -585,18 +584,22 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
                     UNSAFE = sun.misc.Unsafe.getUnsafe();
                     Class k = QNode.class;
                     itemOffset = UNSAFE.objectFieldOffset
-                        (k.getDeclaredField("item"));
+                            (k.getDeclaredField("item"));
                     nextOffset = UNSAFE.objectFieldOffset
-                        (k.getDeclaredField("next"));
+                            (k.getDeclaredField("next"));
                 } catch (Exception e) {
                     throw new Error(e);
                 }
             }
         }
 
-        /** Head of queue */
+        /**
+         * Head of queue
+         */
         transient volatile QNode head;
-        /** Tail of queue */
+        /**
+         * Tail of queue
+         */
         transient volatile QNode tail;
         /**
          * Reference to a cancelled node that might not yet have been
@@ -617,7 +620,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
          */
         void advanceHead(QNode h, QNode nh) {
             if (h == head &&
-                UNSAFE.compareAndSwapObject(this, headOffset, h, nh))
+                    UNSAFE.compareAndSwapObject(this, headOffset, h, nh))
                 h.next = h; // forget old next
         }
 
@@ -634,7 +637,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
          */
         boolean casCleanMe(QNode cmp, QNode val) {
             return cleanMe == cmp &&
-                UNSAFE.compareAndSwapObject(this, cleanMeOffset, cmp, val);
+                    UNSAFE.compareAndSwapObject(this, cleanMeOffset, cmp, val);
         }
 
         /**
@@ -669,7 +672,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
             QNode s = null; // constructed/reused as needed
             boolean isData = (e != null);
 
-            for (;;) {
+            for (; ; ) {
                 QNode t = tail;
                 QNode h = head;
                 if (t == null || h == null)         // saw uninitialized value
@@ -712,8 +715,8 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
 
                     Object x = m.item;
                     if (isData == (x != null) ||    // m already fulfilled
-                        x == m ||                   // m cancelled
-                        !m.casItem(x, e)) {         // lost CAS
+                            x == m ||                   // m cancelled
+                            !m.casItem(x, e)) {         // lost CAS
                         advanceHead(h, m);          // dequeue and retry
                         continue;
                     }
@@ -728,8 +731,8 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
         /**
          * Spins/blocks until node s is fulfilled.
          *
-         * @param s the waiting node
-         * @param e the comparison value for checking match
+         * @param s     the waiting node
+         * @param e     the comparison value for checking match
          * @param timed true if timed wait
          * @param nanos timeout value
          * @return matched item, or s if cancelled
@@ -739,8 +742,8 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
             long lastTime = timed ? System.nanoTime() : 0;
             Thread w = Thread.currentThread();
             int spins = ((head.next == s) ?
-                         (timed ? maxTimedSpins : maxUntimedSpins) : 0);
-            for (;;) {
+                    (timed ? maxTimedSpins : maxUntimedSpins) : 0);
+            for (; ; ) {
                 if (w.isInterrupted())
                     s.tryCancel(e);
                 Object x = s.item;
@@ -806,12 +809,12 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
                     QNode d = dp.next;
                     QNode dn;
                     if (d == null ||               // d is gone or
-                        d == dp ||                 // d is off list or
-                        !d.isCancelled() ||        // d not cancelled or
-                        (d != t &&                 // d not tail and
-                         (dn = d.next) != null &&  //   has successor
-                         dn != d &&                //   that is on list
-                         dp.casNext(d, dn)))       // d unspliced
+                            d == dp ||                 // d is off list or
+                            !d.isCancelled() ||        // d not cancelled or
+                            (d != t &&                 // d not tail and
+                                    (dn = d.next) != null &&  //   has successor
+                                    dn != d &&                //   that is on list
+                                    dp.casNext(d, dn)))       // d unspliced
                         casCleanMe(dp, null);
                     if (dp == pred)
                         return;      // s is already saved node
@@ -824,16 +827,17 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
         private static final long headOffset;
         private static final long tailOffset;
         private static final long cleanMeOffset;
+
         static {
             try {
                 UNSAFE = sun.misc.Unsafe.getUnsafe();
                 Class k = TransferQueue.class;
                 headOffset = UNSAFE.objectFieldOffset
-                    (k.getDeclaredField("head"));
+                        (k.getDeclaredField("head"));
                 tailOffset = UNSAFE.objectFieldOffset
-                    (k.getDeclaredField("tail"));
+                        (k.getDeclaredField("tail"));
                 cleanMeOffset = UNSAFE.objectFieldOffset
-                    (k.getDeclaredField("cleanMe"));
+                        (k.getDeclaredField("cleanMe"));
             } catch (Exception e) {
                 throw new Error(e);
             }
@@ -860,7 +864,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
      * Creates a <tt>SynchronousQueue</tt> with the specified fairness policy.
      *
      * @param fair if true, waiting threads contend in FIFO order for
-     *        access; otherwise the order is unspecified.
+     *             access; otherwise the order is unspecified.
      */
     public SynchronousQueue(boolean fair) {
         transferer = fair ? new TransferQueue() : new TransferStack();
@@ -886,12 +890,12 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
      * up to the specified wait time for another thread to receive it.
      *
      * @return <tt>true</tt> if successful, or <tt>false</tt> if the
-     *         specified waiting time elapses before a consumer appears.
+     * specified waiting time elapses before a consumer appears.
      * @throws InterruptedException {@inheritDoc}
      * @throws NullPointerException {@inheritDoc}
      */
     public boolean offer(E o, long timeout, TimeUnit unit)
-        throws InterruptedException {
+            throws InterruptedException {
         if (o == null) throw new NullPointerException();
         if (transferer.transfer(o, true, unit.toNanos(timeout)) != null)
             return true;
@@ -906,7 +910,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
      *
      * @param e the element to add
      * @return <tt>true</tt> if the element was added to this queue, else
-     *         <tt>false</tt>
+     * <tt>false</tt>
      * @throws NullPointerException if the specified element is null
      */
     public boolean offer(E e) {
@@ -924,7 +928,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
     public E take() throws InterruptedException {
         Object e = transferer.transfer(null, false, 0);
         if (e != null)
-            return (E)e;
+            return (E) e;
         Thread.interrupted();
         throw new InterruptedException();
     }
@@ -935,13 +939,13 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
      * to insert it.
      *
      * @return the head of this queue, or <tt>null</tt> if the
-     *         specified waiting time elapses before an element is present.
+     * specified waiting time elapses before an element is present.
      * @throws InterruptedException {@inheritDoc}
      */
     public E poll(long timeout, TimeUnit unit) throws InterruptedException {
         Object e = transferer.transfer(null, true, unit.toNanos(timeout));
         if (e != null || !Thread.interrupted())
-            return (E)e;
+            return (E) e;
         throw new InterruptedException();
     }
 
@@ -950,10 +954,10 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
      * is currently making an element available.
      *
      * @return the head of this queue, or <tt>null</tt> if no
-     *         element is available.
+     * element is available.
      */
     public E poll() {
-        return (E)transferer.transfer(null, true, 0);
+        return (E) transferer.transfer(null, true, 0);
     }
 
     /**
@@ -1071,6 +1075,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
 
     /**
      * Returns a zero-length array.
+     *
      * @return a zero-length array
      */
     public Object[] toArray() {
@@ -1104,7 +1109,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
             throw new IllegalArgumentException();
         int n = 0;
         E e;
-        while ( (e = poll()) != null) {
+        while ((e = poll()) != null) {
             c.add(e);
             ++n;
         }
@@ -1139,13 +1144,17 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
      * object is ever serialized or deserialized.
      */
 
-    static class WaitQueue implements java.io.Serializable { }
+    static class WaitQueue implements java.io.Serializable {
+    }
+
     static class LifoWaitQueue extends WaitQueue {
         private static final long serialVersionUID = -3633113410248163686L;
     }
+
     static class FifoWaitQueue extends WaitQueue {
         private static final long serialVersionUID = -3623113410248163686L;
     }
+
     private ReentrantLock qlock;
     private WaitQueue waitingProducers;
     private WaitQueue waitingConsumers;
@@ -1156,14 +1165,13 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
      * @param s the stream
      */
     private void writeObject(java.io.ObjectOutputStream s)
-        throws java.io.IOException {
+            throws java.io.IOException {
         boolean fair = transferer instanceof TransferQueue;
         if (fair) {
             qlock = new ReentrantLock(true);
             waitingProducers = new FifoWaitQueue();
             waitingConsumers = new FifoWaitQueue();
-        }
-        else {
+        } else {
             qlock = new ReentrantLock();
             waitingProducers = new LifoWaitQueue();
             waitingConsumers = new LifoWaitQueue();
@@ -1172,7 +1180,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
     }
 
     private void readObject(final java.io.ObjectInputStream s)
-        throws java.io.IOException, ClassNotFoundException {
+            throws java.io.IOException, ClassNotFoundException {
         s.defaultReadObject();
         if (waitingProducers instanceof FifoWaitQueue)
             transferer = new TransferQueue();
