@@ -401,6 +401,7 @@ public abstract class ClassLoader {
                     // If still not found, then invoke findClass in order
                     // to find the class.
                     long t1 = System.nanoTime();
+                    //加载.class文件放入方法区得到Class类
                     c = findClass(name);
 
                     // this is the defining class loader; record the stats
@@ -410,6 +411,7 @@ public abstract class ClassLoader {
                 }
             }
             if (resolve) {
+                //完成连接初始化操作
                 resolveClass(c);
             }
             return c;
