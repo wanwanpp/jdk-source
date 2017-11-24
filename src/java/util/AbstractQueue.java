@@ -61,6 +61,7 @@ package java.util;
  * @author Doug Lea
  * @param <E> the type of elements held in this collection
  */
+//实现了队列的基本操作
 public abstract class AbstractQueue<E>
     extends AbstractCollection<E>
     implements Queue<E> {
