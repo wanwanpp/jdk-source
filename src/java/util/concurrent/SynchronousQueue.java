@@ -199,19 +199,23 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
         /**
          * Node represents an unfulfilled consumer
          */
+        //消费者
         static final int REQUEST = 0;
         /**
          * Node represents an unfulfilled producer
          */
+        //生产者
         static final int DATA = 1;
         /**
          * Node is fulfilling another unfulfilled DATA or REQUEST
          */
+        //表示匹配另一个生产者或者消费者
         static final int FULFILLING = 2;
 
         /**
          * Return true if m has fulfilling bit set
          */
+        //表示是否包含FULFILLING标记。
         static boolean isFulfilling(int m) {
             return (m & FULFILLING) != 0;
         }
@@ -219,12 +223,14 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
         /**
          * Node class for TransferStacks.
          */
+        //TransferStack栈中的节点。
         static final class SNode {
-            volatile SNode next;        // next node in stack
-            volatile SNode match;       // the node matched to this
-            volatile Thread waiter;     // to control park/unpark
-            Object item;                // data; or null for REQUESTs
-            int mode;
+            volatile SNode next;        // next node in stack              下一节点
+            volatile SNode match;       // the node matched to this   匹配的节点
+            volatile Thread waiter;     // to control park/unpark        等待的线程
+            Object item;                // data; or null for REQUESTs        元素
+            int mode;                                                                      //模式
+            //item和mode不需要volatile，因为他们在volatile/atomic操作之前写，之后读。
             // Note: item and mode fields don't need to be volatile
             // since they are always written before, and read after,
             // other volatile/atomic operations.
@@ -249,13 +255,17 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
             boolean tryMatch(SNode s) {
                 if (match == null &&
                         UNSAFE.compareAndSwapObject(this, matchOffset, null, s)) {
+                    //获取此节点的等待线程
                     Thread w = waiter;
                     if (w != null) {    // waiters need at most one unpark
+                        //将waiter属性置为空
                         waiter = null;
+                        //唤醒等待线程
                         LockSupport.unpark(w);
                     }
                     return true;
                 }
+                // 如果match不为null或者CAS设置失败，则比较match域是否等于s结点，若相等，则表示已经完成匹配，匹配成功
                 return match == s;
             }
 
