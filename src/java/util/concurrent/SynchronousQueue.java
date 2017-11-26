@@ -356,7 +356,8 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
                 if (h == null || h.mode == mode) {  // empty or same-mode
                     if (timed && nanos <= 0) {      // can't wait
                         if (h != null && h.isCancelled())
-                            casHead(h, h.next);     // pop cancelled node
+                            //修改head属性
+                            casHead(h, h.next);   //弹出cancel的节点  // pop cancelled node
                         else
                             return null;
                     } else if (casHead(h, s = snode(s, e, h, mode))) {
@@ -866,6 +867,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
     /**
      * Creates a <tt>SynchronousQueue</tt> with nonfair access policy.
      */
+    //非公平策略
     public SynchronousQueue() {
         this(false);
     }
@@ -876,6 +878,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
      * @param fair if true, waiting threads contend in FIFO order for
      *             access; otherwise the order is unspecified.
      */
+    //选择公平策略
     public SynchronousQueue(boolean fair) {
         transferer = fair ? new TransferQueue() : new TransferStack();
     }
@@ -887,6 +890,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
      * @throws InterruptedException {@inheritDoc}
      * @throws NullPointerException {@inheritDoc}
      */
+//    // 将指定元素添加到此队列，如有必要则等待另一个线程接收它
     public void put(E o) throws InterruptedException {
         if (o == null) throw new NullPointerException();
         if (transferer.transfer(o, false, 0) == null) {
@@ -904,6 +908,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
      * @throws InterruptedException {@inheritDoc}
      * @throws NullPointerException {@inheritDoc}
      */
+    //// 将指定元素插入到此队列，如有必要则等待指定的时间，以便另一个线程接收它
     public boolean offer(E o, long timeout, TimeUnit unit)
             throws InterruptedException {
         if (o == null) throw new NullPointerException();
@@ -923,6 +928,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
      * <tt>false</tt>
      * @throws NullPointerException if the specified element is null
      */
+    // // 如果另一个线程正在等待以便接收指定元素，则将指定元素插入到此队列
     public boolean offer(E e) {
         if (e == null) throw new NullPointerException();
         return transferer.transfer(e, true, 0) != null;
@@ -966,6 +972,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
      * @return the head of this queue, or <tt>null</tt> if no
      * element is available.
      */
+    // 如果另一个线程当前正要使用某个元素，则获取并移除此队列的头
     public E poll() {
         return (E) transferer.transfer(null, true, 0);
     }
@@ -976,6 +983,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
      *
      * @return <tt>true</tt>
      */
+    //一直为true
     public boolean isEmpty() {
         return true;
     }
@@ -986,6 +994,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
      *
      * @return zero.
      */
+    //总是为0
     public int size() {
         return 0;
     }
@@ -1112,6 +1121,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
      * @throws NullPointerException          {@inheritDoc}
      * @throws IllegalArgumentException      {@inheritDoc}
      */
+    //// 移除此队列中所有可用的元素，并将它们添加到给定 collection 中
     public int drainTo(Collection<? super E> c) {
         if (c == null)
             throw new NullPointerException();
@@ -1132,6 +1142,7 @@ public class SynchronousQueue<E> extends AbstractQueue<E>
      * @throws NullPointerException          {@inheritDoc}
      * @throws IllegalArgumentException      {@inheritDoc}
      */
+    //// 最多从此队列中移除给定数量的可用元素，并将这些元素添加到给定 collection 中
     public int drainTo(Collection<? super E> c, int maxElements) {
         if (c == null)
             throw new NullPointerException();
