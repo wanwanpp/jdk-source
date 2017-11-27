@@ -132,7 +132,7 @@ public class ReentrantLock implements Lock, java.io.Serializable {
          * implemented in subclasses, but both need nonfair
          * try for trylock method.
          */
-        //不公平锁获取同步状态
+        //不公平锁获取同步状态,不按照节点的先后
         final boolean nonfairTryAcquire(int acquires) {
             final Thread current = Thread.currentThread();
             int c = getState();
@@ -242,7 +242,7 @@ public class ReentrantLock implements Lock, java.io.Serializable {
             final Thread current = Thread.currentThread();
             int c = getState();
             if (c == 0) {
-                //hasQueuedPredecessors()来保证公平。
+                //hasQueuedPredecessors()来保证公平，判断队列中当前线程前面是否有需要执行的线程。
                 if (!hasQueuedPredecessors() &&
                         compareAndSetState(0, acquires)) {
                     //设置当前独占线程
