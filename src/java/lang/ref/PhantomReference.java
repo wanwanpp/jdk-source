@@ -50,6 +50,7 @@ package java.lang.ref;
  * @since    1.2
  */
 
+//必须和引用队列一起使用。其引用的对象被回收时会收到一个通知
 public class PhantomReference<T> extends Reference<T> {
 
     /**

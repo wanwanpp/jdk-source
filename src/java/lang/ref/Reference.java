@@ -34,10 +34,11 @@ import sun.misc.Cleaner;
  * implemented in close cooperation with the garbage collector, this class may
  * not be subclassed directly.
  *
- * @author   Mark Reinhold
- * @since    1.2
+ * @author Mark Reinhold
+ * @since 1.2
  */
-
+//封装了其它对象的引用，可以和普通的对象一样操作，在一定的限制条件下，支持和垃圾收集器的交互
+//程序有时候也需要在对象回收后被通知，以告知对象的可达性发生变更。
 public abstract class Reference<T> {
 
     /* A Reference instance is in one of four possible internal states:
@@ -89,6 +90,7 @@ public abstract class Reference<T> {
 
     private T referent;         /* Treated specially by GC */
 
+    //引用队列
     ReferenceQueue<? super T> queue;
 
     Reference next;
@@ -100,7 +102,10 @@ public abstract class Reference<T> {
      * therefore critical that any code holding this lock complete as quickly
      * as possible, allocate no new objects, and avoid calling user code.
      */
-    static private class Lock { };
+    static private class Lock {
+    }
+
+    ;
     private static Lock lock = new Lock();
 
 
@@ -119,7 +124,7 @@ public abstract class Reference<T> {
         }
 
         public void run() {
-            for (;;) {
+            for (; ; ) {
 
                 Reference r;
                 synchronized (lock) {
@@ -131,14 +136,15 @@ public abstract class Reference<T> {
                     } else {
                         try {
                             lock.wait();
-                        } catch (InterruptedException x) { }
+                        } catch (InterruptedException x) {
+                        }
                         continue;
                     }
                 }
 
                 // Fast path for cleaners
                 if (r instanceof Cleaner) {
-                    ((Cleaner)r).clean();
+                    ((Cleaner) r).clean();
                     continue;
                 }
 
@@ -152,7 +158,8 @@ public abstract class Reference<T> {
         ThreadGroup tg = Thread.currentThread().getThreadGroup();
         for (ThreadGroup tgn = tg;
              tgn != null;
-             tg = tgn, tgn = tg.getParent());
+             tg = tgn, tgn = tg.getParent())
+            ;
         Thread handler = new ReferenceHandler(tg, "Reference Handler");
         /* If there were a special system-only priority greater than
          * MAX_PRIORITY, it would be used here
@@ -170,8 +177,8 @@ public abstract class Reference<T> {
      * been cleared, either by the program or by the garbage collector, then
      * this method returns <code>null</code>.
      *
-     * @return   The object to which this reference refers, or
-     *           <code>null</code> if this reference object has been cleared
+     * @return The object to which this reference refers, or
+     * <code>null</code> if this reference object has been cleared
      */
     public T get() {
         return this.referent;
@@ -180,7 +187,7 @@ public abstract class Reference<T> {
     /**
      * Clears this reference object.  Invoking this method will not cause this
      * object to be enqueued.
-     *
+     * <p>
      * <p> This method is invoked only by Java code; when the garbage collector
      * clears references it does so directly, without invoking this method.
      */
@@ -197,8 +204,8 @@ public abstract class Reference<T> {
      * not registered with a queue when it was created, then this method will
      * always return <code>false</code>.
      *
-     * @return   <code>true</code> if and only if this reference object has
-     *           been enqueued
+     * @return <code>true</code> if and only if this reference object has
+     * been enqueued
      */
     public boolean isEnqueued() {
         /* In terms of the internal states, this predicate actually tests
@@ -211,13 +218,13 @@ public abstract class Reference<T> {
     /**
      * Adds this reference object to the queue with which it is registered,
      * if any.
-     *
+     * <p>
      * <p> This method is invoked only by Java code; when the garbage collector
      * enqueues references it does so directly, without invoking this method.
      *
-     * @return   <code>true</code> if this reference object was successfully
-     *           enqueued; <code>false</code> if it was already enqueued or if
-     *           it was not registered with a queue when it was created
+     * @return <code>true</code> if this reference object was successfully
+     * enqueued; <code>false</code> if it was already enqueued or if
+     * it was not registered with a queue when it was created
      */
     public boolean enqueue() {
         return this.queue.enqueue(this);

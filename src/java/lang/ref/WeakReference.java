@@ -44,7 +44,7 @@ package java.lang.ref;
  * @author   Mark Reinhold
  * @since    1.2
  */
-
+//不管内存是否足够，引用对象在垃圾回收时都会被回收。
 public class WeakReference<T> extends Reference<T> {
 
     /**

@@ -60,7 +60,7 @@ package java.lang.ref;
  * @author   Mark Reinhold
  * @since    1.2
  */
-
+//引用对象在内存不足时被回收
 public class SoftReference<T> extends Reference<T> {
 
     /**
