@@ -87,12 +87,12 @@ public abstract class Reference<T> {
      * the enqueue() method to those objects, collectors should link
      * discovered objects through the discovered field.
      */
-
+    // 用于保存对象的引用，GC会根据不同Reference来特别对待
     private T referent;         /* Treated specially by GC */
 
-    //引用队列
+    // 如果需要通知机制，则保存的对对应的队列
     ReferenceQueue<? super T> queue;
-
+    //用于实现一个单向循环链表，用以将保存需要由ReferenceHandler处理的引用
     Reference next;
     transient private Reference<T> discovered;  /* used by VM */
 
@@ -105,7 +105,7 @@ public abstract class Reference<T> {
     static private class Lock {
     }
 
-    ;
+    //锁，用于同步pending队列的进队和出队
     private static Lock lock = new Lock();
 
 
@@ -113,6 +113,7 @@ public abstract class Reference<T> {
      * References to this list, while the Reference-handler thread removes
      * them.  This list is protected by the above lock object.
      */
+    //保存一个PENDING的队列，配合上述next一起使用
     private static Reference pending = null;
 
     /* High-priority thread to enqueue pending References
