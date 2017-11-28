@@ -28,11 +28,13 @@ package java.lang.ref;
 /**
  * Reference queues, to which registered reference objects are appended by the
  * garbage collector after the appropriate reachability changes are detected.
+ * 在检测到可达性发生变化是会将对应的注册到此队列的Reference添加到此队列中。
  *
  * @author   Mark Reinhold
  * @since    1.2
  */
-
+//创建Reference时，将Queue注册到Reference中，当该Reference所引用的对象被垃圾收集器回收时，
+// 会将该Reference放到该队列中，相当于一种通知机制。
 public class ReferenceQueue<T> {
 
     /**
