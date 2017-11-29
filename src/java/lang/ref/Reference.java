@@ -113,11 +113,15 @@ public abstract class Reference<T> {
      * References to this list, while the Reference-handler thread removes
      * them.  This list is protected by the above lock object.
      */
+    //垃圾收集器将引用添加到pending队列，ReferenceHandler会从这个队列中取出Reference元素，添加到Reference各自注册的引用队列中。
     //保存一个PENDING的队列，配合上述next一起使用
     private static Reference pending = null;
 
     /* High-priority thread to enqueue pending References
      */
+    //使pending引用进入队列
+    //将pending队列里面的Reference实例依次添加到不同的ReferenceQueue
+    // 中（取决于Reference里面的queue）。该pending的元素由GC负责加入。
     private static class ReferenceHandler extends Thread {
 
         ReferenceHandler(ThreadGroup g, String name) {
@@ -128,14 +132,16 @@ public abstract class Reference<T> {
             for (; ; ) {
 
                 Reference r;
+                //获取需要进入队列的pending引用
                 synchronized (lock) {
                     if (pending != null) {
                         r = pending;
                         Reference rn = r.next;
-                        pending = (rn == r) ? null : rn;
+                        pending = (rn == r) ? null : rn;  //如果rn==r，说明后继节点为空，给pending赋值null，否则就为后继节点rn。
                         r.next = r;
                     } else {
                         try {
+//                            没有pending则等待
                             lock.wait();
                         } catch (InterruptedException x) {
                         }
@@ -149,6 +155,7 @@ public abstract class Reference<T> {
                     continue;
                 }
 
+                //将pending引用放入其注册的队列中
                 ReferenceQueue q = r.queue;
                 if (q != ReferenceQueue.NULL) q.enqueue(r);
             }
