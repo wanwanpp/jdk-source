@@ -9,6 +9,8 @@ import java.lang.ref.WeakReference;
  * @author 王萍
  * @date 2017/11/28 0028
  */
+
+//  博客：https://vinoit.me/2017/06/23/java-phantom-reference/     http://www.cnblogs.com/jabnih/p/6580665.html
 public class TestReferenceQueue {
 
     public static void main(String[] args) throws InterruptedException {
