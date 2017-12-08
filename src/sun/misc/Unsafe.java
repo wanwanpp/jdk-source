@@ -204,6 +204,9 @@ public final class Unsafe {
      *
      * @see #putInt(Object, int, int)
      */
+    // o位需要修改的对象
+    // offset为相对对象的偏移地址
+    // x为为该偏移地址上赋的值。
     public native void putObject(Object o, long offset, Object x);
 
     /**

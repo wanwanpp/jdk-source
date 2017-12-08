@@ -1,5 +1,6 @@
 package com.jdk.test;
 
+import org.junit.Test;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
@@ -24,7 +25,7 @@ public class TestUnsafe {
 //    }
 
 
-    @org.junit.Test
+    @Test
     public void testUnsafePut() throws NoSuchFieldException, IllegalAccessException {
         // 通过反射得到theUnsafe对应的Field对象
         Field field = Unsafe.class.getDeclaredField("theUnsafe");
@@ -49,8 +50,18 @@ public class TestUnsafe {
 
         System.out.println(user);//打印midified-name,100,101,100.1
     }
-}
 
+    @Test
+    //在指定address写入char。
+    //操作不成功，直接fatal error。
+    public void testPutChar() throws Exception {
+        char s = 'x';
+        Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
+        theUnsafe.setAccessible(true);
+        Unsafe unsafe = (Unsafe) theUnsafe.get(null);
+        unsafe.putChar(System.identityHashCode(s), '2');
+    }
+}
 
 class User {
     private String name = "test";

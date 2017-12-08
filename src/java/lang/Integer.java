@@ -611,6 +611,7 @@ public final class Integer extends Number implements Comparable<Integer> {
 
             cache = new Integer[(high - low) + 1];
             int j = low;
+            //½«cache[]Êı×é»º´æÌî³äÂú¡£
             for (int k = 0; k < cache.length; k++)
                 cache[k] = new Integer(j++);
         }
