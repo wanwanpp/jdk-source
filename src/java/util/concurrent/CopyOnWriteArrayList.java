@@ -35,8 +35,7 @@
 
 package java.util.concurrent;
 import java.util.*;
-import java.util.concurrent.locks.*;
-import sun.misc.Unsafe;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A thread-safe variant of {@link java.util.ArrayList} in which all mutative
@@ -433,6 +432,7 @@ public class CopyOnWriteArrayList<E>
      *
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
+    //每次add或remove都会复制数据重新创建array数组替换旧的array。
     public void add(int index, E element) {
         final ReentrantLock lock = this.lock;
         lock.lock();

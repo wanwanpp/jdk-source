@@ -76,6 +76,7 @@ package java.util;
  * @see LinkedList
  * @since   JDK1.0
  */
+//对方法添加了synchronized以保证线程安全，读多写少的情景下建议使用CopyOnWriteArrayList
 public class Vector<E>
     extends AbstractList<E>
     implements List<E>, RandomAccess, Cloneable, java.io.Serializable
