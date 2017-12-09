@@ -24,16 +24,17 @@
  */
 
 package java.util;
+
 import java.io.*;
 
 /**
  * This class implements a hash table, which maps keys to values. Any
  * non-<code>null</code> object can be used as a key or as a value. <p>
- *
+ * <p>
  * To successfully store and retrieve objects from a hashtable, the
  * objects used as keys must implement the <code>hashCode</code>
  * method and the <code>equals</code> method. <p>
- *
+ * <p>
  * An instance of <code>Hashtable</code> has two parameters that affect its
  * performance: <i>initial capacity</i> and <i>load factor</i>.  The
  * <i>capacity</i> is the number of <i>buckets</i> in the hash table, and the
@@ -45,24 +46,24 @@ import java.io.*;
  * The initial capacity and load factor parameters are merely hints to
  * the implementation.  The exact details as to when and whether the rehash
  * method is invoked are implementation-dependent.<p>
- *
+ * <p>
  * Generally, the default load factor (.75) offers a good tradeoff between
  * time and space costs.  Higher values decrease the space overhead but
  * increase the time cost to look up an entry (which is reflected in most
  * <tt>Hashtable</tt> operations, including <tt>get</tt> and <tt>put</tt>).<p>
- *
+ * <p>
  * The initial capacity controls a tradeoff between wasted space and the
  * need for <code>rehash</code> operations, which are time-consuming.
  * No <code>rehash</code> operations will <i>ever</i> occur if the initial
  * capacity is greater than the maximum number of entries the
  * <tt>Hashtable</tt> will contain divided by its load factor.  However,
  * setting the initial capacity too high can waste space.<p>
- *
+ * <p>
  * If many entries are to be made into a <code>Hashtable</code>,
  * creating it with a sufficiently large capacity may allow the
  * entries to be inserted more efficiently than letting it perform
  * automatic rehashing as needed to grow the table. <p>
- *
+ * <p>
  * This example creates a hashtable of numbers. It uses the names of
  * the numbers as keys:
  * <pre>   {@code
@@ -71,14 +72,14 @@ import java.io.*;
  *   numbers.put("one", 1);
  *   numbers.put("two", 2);
  *   numbers.put("three", 3);}</pre>
- *
+ * <p>
  * <p>To retrieve a number, use the following code:
  * <pre>   {@code
  *   Integer n = numbers.get("two");
  *   if (n != null) {
  *     System.out.println("two = " + n);
  *   }}</pre>
- *
+ * <p>
  * <p>The iterators returned by the <tt>iterator</tt> method of the collections
  * returned by all of this class's "collection view methods" are
  * <em>fail-fast</em>: if the Hashtable is structurally modified at any time
@@ -89,7 +90,7 @@ import java.io.*;
  * arbitrary, non-deterministic behavior at an undetermined time in the future.
  * The Enumerations returned by Hashtable's keys and elements methods are
  * <em>not</em> fail-fast.
- *
+ * <p>
  * <p>Note that the fail-fast behavior of an iterator cannot be guaranteed
  * as it is, generally speaking, impossible to make any hard guarantees in the
  * presence of unsynchronized concurrent modification.  Fail-fast iterators
@@ -97,11 +98,11 @@ import java.io.*;
  * Therefore, it would be wrong to write a program that depended on this
  * exception for its correctness: <i>the fail-fast behavior of iterators
  * should be used only to detect bugs.</i>
- *
+ * <p>
  * <p>As of the Java 2 platform v1.2, this class was retrofitted to
  * implement the {@link Map} interface, making it a member of the
  * <a href="{@docRoot}/../technotes/guides/collections/index.html">
- *
+ * <p>
  * Java Collections Framework</a>.  Unlike the new collection
  * implementations, {@code Hashtable} is synchronized.  If a
  * thread-safe implementation is not needed, it is recommended to use
@@ -110,30 +111,36 @@ import java.io.*;
  * to use {@link java.util.concurrent.ConcurrentHashMap} in place of
  * {@code Hashtable}.
  *
- * @author  Arthur van Hoff
- * @author  Josh Bloch
- * @author  Neal Gafter
- * @see     Object#equals(java.lang.Object)
- * @see     Object#hashCode()
- * @see     Hashtable#rehash()
- * @see     Collection
- * @see     Map
- * @see     HashMap
- * @see     TreeMap
+ * @author Arthur van Hoff
+ * @author Josh Bloch
+ * @author Neal Gafter
+ * @see Object#equals(java.lang.Object)
+ * @see Object#hashCode()
+ * @see Hashtable#rehash()
+ * @see Collection
+ * @see Map
+ * @see HashMap
+ * @see TreeMap
  * @since JDK1.0
  */
-public class Hashtable<K,V>
-    extends Dictionary<K,V>
-    implements Map<K,V>, Cloneable, java.io.Serializable {
+//参考博客：http://www.cnblogs.com/skywang12345/p/3310887.html
+//http://blog.csdn.net/chdjj/article/details/38581035
+//大部分方法都加了synchronized使得线程安全
+public class Hashtable<K, V>
+        extends Dictionary<K, V>
+        implements Map<K, V>, Cloneable, java.io.Serializable {
 
     /**
      * The hash table data.
      */
-    private transient Entry<K,V>[] table;
+    // Hashtable保存key-value的数组。
+    // Hashtable是采用拉链法实现的，每一个Entry本质上是一个单向链表
+    private transient Entry<K, V>[] table;
 
     /**
      * The total number of entries in the hash table.
      */
+    //Entry的个数
     private transient int count;
 
     /**
@@ -142,6 +149,7 @@ public class Hashtable<K,V>
      *
      * @serial
      */
+//    阈值，判断是否扩容
     private int threshold;
 
     /**
@@ -149,6 +157,7 @@ public class Hashtable<K,V>
      *
      * @serial
      */
+    //负载因子
     private float loadFactor;
 
     /**
@@ -158,9 +167,13 @@ public class Hashtable<K,V>
      * rehash).  This field is used to make iterators on Collection-views of
      * the Hashtable fail-fast.  (See ConcurrentModificationException).
      */
+    //用于fail-fast,记录被改变的次数
     private transient int modCount = 0;
 
-    /** use serialVersionUID from JDK 1.0.2 for interoperability */
+    /**
+     * use serialVersionUID from JDK 1.0.2 for interoperability
+     */
+    //序列版本号
     private static final long serialVersionUID = 1421746759512286392L;
 
     /**
@@ -187,8 +200,8 @@ public class Hashtable<K,V>
 
         static {
             String altThreshold = java.security.AccessController.doPrivileged(
-                new sun.security.action.GetPropertyAction(
-                    "jdk.map.althashing.threshold"));
+                    new sun.security.action.GetPropertyAction(
+                            "jdk.map.althashing.threshold"));
 
             int threshold;
             try {
@@ -204,7 +217,7 @@ public class Hashtable<K,V>
                 if (threshold < 0) {
                     throw new IllegalArgumentException("value must be positive integer.");
                 }
-            } catch(IllegalArgumentException failed) {
+            } catch (IllegalArgumentException failed) {
                 throw new Error("Illegal value for 'jdk.map.althashing.threshold'", failed);
             }
 
@@ -228,8 +241,8 @@ public class Hashtable<K,V>
         boolean switching = currentAltHashing ^ useAltHashing;
         if (switching) {
             hashSeed = useAltHashing
-                ? sun.misc.Hashing.randomHashSeed(this)
-                : 0;
+                    ? sun.misc.Hashing.randomHashSeed(this)
+                    : 0;
         }
         return switching;
     }
@@ -243,23 +256,24 @@ public class Hashtable<K,V>
      * Constructs a new, empty hashtable with the specified initial
      * capacity and the specified load factor.
      *
-     * @param      initialCapacity   the initial capacity of the hashtable.
-     * @param      loadFactor        the load factor of the hashtable.
-     * @exception  IllegalArgumentException  if the initial capacity is less
-     *             than zero, or if the load factor is nonpositive.
+     * @param initialCapacity the initial capacity of the hashtable.
+     * @param loadFactor      the load factor of the hashtable.
+     * @throws IllegalArgumentException if the initial capacity is less
+     *                                  than zero, or if the load factor is nonpositive.
      */
+    //初始容量可为任意数，最小为1.
     public Hashtable(int initialCapacity, float loadFactor) {
         if (initialCapacity < 0)
-            throw new IllegalArgumentException("Illegal Capacity: "+
-                                               initialCapacity);
+            throw new IllegalArgumentException("Illegal Capacity: " +
+                    initialCapacity);
         if (loadFactor <= 0 || Float.isNaN(loadFactor))
-            throw new IllegalArgumentException("Illegal Load: "+loadFactor);
+            throw new IllegalArgumentException("Illegal Load: " + loadFactor);
 
-        if (initialCapacity==0)
+        if (initialCapacity == 0)
             initialCapacity = 1;
         this.loadFactor = loadFactor;
         table = new Entry[initialCapacity];
-        threshold = (int)Math.min(initialCapacity * loadFactor, MAX_ARRAY_SIZE + 1);
+        threshold = (int) Math.min(initialCapacity * loadFactor, MAX_ARRAY_SIZE + 1);
         initHashSeedAsNeeded(initialCapacity);
     }
 
@@ -267,9 +281,9 @@ public class Hashtable<K,V>
      * Constructs a new, empty hashtable with the specified initial capacity
      * and default load factor (0.75).
      *
-     * @param     initialCapacity   the initial capacity of the hashtable.
-     * @exception IllegalArgumentException if the initial capacity is less
-     *              than zero.
+     * @param initialCapacity the initial capacity of the hashtable.
+     * @throws IllegalArgumentException if the initial capacity is less
+     *                                  than zero.
      */
     public Hashtable(int initialCapacity) {
         this(initialCapacity, 0.75f);
@@ -280,6 +294,7 @@ public class Hashtable<K,V>
      * and load factor (0.75).
      */
     public Hashtable() {
+        //默认初始容量为11
         this(11, 0.75f);
     }
 
@@ -290,17 +305,18 @@ public class Hashtable<K,V>
      *
      * @param t the map whose mappings are to be placed in this map.
      * @throws NullPointerException if the specified map is null.
-     * @since   1.2
+     * @since 1.2
      */
+    //以Map为参数的构造
     public Hashtable(Map<? extends K, ? extends V> t) {
-        this(Math.max(2*t.size(), 11), 0.75f);
+        this(Math.max(2 * t.size(), 11), 0.75f);
         putAll(t);
     }
 
     /**
      * Returns the number of keys in this hashtable.
      *
-     * @return  the number of keys in this hashtable.
+     * @return the number of keys in this hashtable.
      */
     public synchronized int size() {
         return count;
@@ -309,8 +325,8 @@ public class Hashtable<K,V>
     /**
      * Tests if this hashtable maps no keys to values.
      *
-     * @return  <code>true</code> if this hashtable maps no keys to values;
-     *          <code>false</code> otherwise.
+     * @return <code>true</code> if this hashtable maps no keys to values;
+     * <code>false</code> otherwise.
      */
     public synchronized boolean isEmpty() {
         return count == 0;
@@ -319,11 +335,11 @@ public class Hashtable<K,V>
     /**
      * Returns an enumeration of the keys in this hashtable.
      *
-     * @return  an enumeration of the keys in this hashtable.
-     * @see     Enumeration
-     * @see     #elements()
-     * @see     #keySet()
-     * @see     Map
+     * @return an enumeration of the keys in this hashtable.
+     * @see Enumeration
+     * @see #elements()
+     * @see #keySet()
+     * @see Map
      */
     public synchronized Enumeration<K> keys() {
         return this.<K>getEnumeration(KEYS);
@@ -334,11 +350,11 @@ public class Hashtable<K,V>
      * Use the Enumeration methods on the returned object to fetch the elements
      * sequentially.
      *
-     * @return  an enumeration of the values in this hashtable.
-     * @see     java.util.Enumeration
-     * @see     #keys()
-     * @see     #values()
-     * @see     Map
+     * @return an enumeration of the values in this hashtable.
+     * @see java.util.Enumeration
+     * @see #keys()
+     * @see #values()
+     * @see Map
      */
     public synchronized Enumeration<V> elements() {
         return this.<V>getEnumeration(VALUES);
@@ -348,26 +364,27 @@ public class Hashtable<K,V>
      * Tests if some key maps into the specified value in this hashtable.
      * This operation is more expensive than the {@link #containsKey
      * containsKey} method.
-     *
+     * <p>
      * <p>Note that this method is identical in functionality to
      * {@link #containsValue containsValue}, (which is part of the
      * {@link Map} interface in the collections framework).
      *
-     * @param      value   a value to search for
-     * @return     <code>true</code> if and only if some key maps to the
-     *             <code>value</code> argument in this hashtable as
-     *             determined by the <tt>equals</tt> method;
-     *             <code>false</code> otherwise.
-     * @exception  NullPointerException  if the value is <code>null</code>
+     * @param value a value to search for
+     * @return <code>true</code> if and only if some key maps to the
+     * <code>value</code> argument in this hashtable as
+     * determined by the <tt>equals</tt> method;
+     * <code>false</code> otherwise.
+     * @throws NullPointerException if the value is <code>null</code>
      */
     public synchronized boolean contains(Object value) {
+        //参数为null，抛异常
         if (value == null) {
             throw new NullPointerException();
         }
 
         Entry tab[] = table;
-        for (int i = tab.length ; i-- > 0 ;) {
-            for (Entry<K,V> e = tab[i] ; e != null ; e = e.next) {
+        for (int i = tab.length; i-- > 0; ) {
+            for (Entry<K, V> e = tab[i]; e != null; e = e.next) {
                 if (e.value.equals(value)) {
                     return true;
                 }
@@ -378,14 +395,14 @@ public class Hashtable<K,V>
 
     /**
      * Returns true if this hashtable maps one or more keys to this value.
-     *
+     * <p>
      * <p>Note that this method is identical in functionality to {@link
      * #contains contains} (which predates the {@link Map} interface).
      *
      * @param value value whose presence in this hashtable is to be tested
      * @return <tt>true</tt> if this map maps one or more keys to the
-     *         specified value
-     * @throws NullPointerException  if the value is <code>null</code>
+     * specified value
+     * @throws NullPointerException if the value is <code>null</code>
      * @since 1.2
      */
     public boolean containsValue(Object value) {
@@ -395,18 +412,18 @@ public class Hashtable<K,V>
     /**
      * Tests if the specified object is a key in this hashtable.
      *
-     * @param   key   possible key
-     * @return  <code>true</code> if and only if the specified object
-     *          is a key in this hashtable, as determined by the
-     *          <tt>equals</tt> method; <code>false</code> otherwise.
-     * @throws  NullPointerException  if the key is <code>null</code>
-     * @see     #contains(Object)
+     * @param key possible key
+     * @return <code>true</code> if and only if the specified object
+     * is a key in this hashtable, as determined by the
+     * <tt>equals</tt> method; <code>false</code> otherwise.
+     * @throws NullPointerException if the key is <code>null</code>
+     * @see #contains(Object)
      */
     public synchronized boolean containsKey(Object key) {
         Entry tab[] = table;
         int hash = hash(key);
         int index = (hash & 0x7FFFFFFF) % tab.length;
-        for (Entry<K,V> e = tab[index] ; e != null ; e = e.next) {
+        for (Entry<K, V> e = tab[index]; e != null; e = e.next) {
             if ((e.hash == hash) && e.key.equals(key)) {
                 return true;
             }
@@ -417,7 +434,7 @@ public class Hashtable<K,V>
     /**
      * Returns the value to which the specified key is mapped,
      * or {@code null} if this map contains no mapping for the key.
-     *
+     * <p>
      * <p>More formally, if this map contains a mapping from a key
      * {@code k} to a value {@code v} such that {@code (key.equals(k))},
      * then this method returns {@code v}; otherwise it returns
@@ -425,15 +442,15 @@ public class Hashtable<K,V>
      *
      * @param key the key whose associated value is to be returned
      * @return the value to which the specified key is mapped, or
-     *         {@code null} if this map contains no mapping for the key
+     * {@code null} if this map contains no mapping for the key
      * @throws NullPointerException if the specified key is null
-     * @see     #put(Object, Object)
+     * @see #put(Object, Object)
      */
     public synchronized V get(Object key) {
         Entry tab[] = table;
         int hash = hash(key);
         int index = (hash & 0x7FFFFFFF) % tab.length;
-        for (Entry<K,V> e = tab[index] ; e != null ; e = e.next) {
+        for (Entry<K, V> e = tab[index]; e != null; e = e.next) {
             if ((e.hash == hash) && e.key.equals(key)) {
                 return e.value;
             }
@@ -458,9 +475,10 @@ public class Hashtable<K,V>
      */
     protected void rehash() {
         int oldCapacity = table.length;
-        Entry<K,V>[] oldMap = table;
+        Entry<K, V>[] oldMap = table;
 
         // overflow-conscious code
+        //2倍+1  ，HashMap没有+1.
         int newCapacity = (oldCapacity << 1) + 1;
         if (newCapacity - MAX_ARRAY_SIZE > 0) {
             if (oldCapacity == MAX_ARRAY_SIZE)
@@ -468,17 +486,17 @@ public class Hashtable<K,V>
                 return;
             newCapacity = MAX_ARRAY_SIZE;
         }
-        Entry<K,V>[] newMap = new Entry[newCapacity];
+        Entry<K, V>[] newMap = new Entry[newCapacity];
 
         modCount++;
-        threshold = (int)Math.min(newCapacity * loadFactor, MAX_ARRAY_SIZE + 1);
+        threshold = (int) Math.min(newCapacity * loadFactor, MAX_ARRAY_SIZE + 1);
         boolean rehash = initHashSeedAsNeeded(newCapacity);
 
         table = newMap;
 
-        for (int i = oldCapacity ; i-- > 0 ;) {
-            for (Entry<K,V> old = oldMap[i] ; old != null ; ) {
-                Entry<K,V> e = old;
+        for (int i = oldCapacity; i-- > 0; ) {
+            for (Entry<K, V> old = oldMap[i]; old != null; ) {
+                Entry<K, V> e = old;
                 old = old.next;
 
                 if (rehash) {
@@ -495,30 +513,33 @@ public class Hashtable<K,V>
      * Maps the specified <code>key</code> to the specified
      * <code>value</code> in this hashtable. Neither the key nor the
      * value can be <code>null</code>. <p>
-     *
+     * <p>
      * The value can be retrieved by calling the <code>get</code> method
      * with a key that is equal to the original key.
      *
-     * @param      key     the hashtable key
-     * @param      value   the value
-     * @return     the previous value of the specified key in this hashtable,
-     *             or <code>null</code> if it did not have one
-     * @exception  NullPointerException  if the key or value is
-     *               <code>null</code>
-     * @see     Object#equals(Object)
-     * @see     #get(Object)
+     * @param key   the hashtable key
+     * @param value the value
+     * @return the previous value of the specified key in this hashtable,
+     * or <code>null</code> if it did not have one
+     * @throws NullPointerException if the key or value is
+     *                              <code>null</code>
+     * @see Object#equals(Object)
+     * @see #get(Object)
      */
     public synchronized V put(K key, V value) {
         // Make sure the value is not null
+        //value不能为null
         if (value == null) {
             throw new NullPointerException();
         }
 
         // Makes sure the key is not already in the hashtable.
         Entry tab[] = table;
+        //若key为null，调用hash方法也会抛空指针异常
         int hash = hash(key);
+        //模运算求bucket的位置索引
         int index = (hash & 0x7FFFFFFF) % tab.length;
-        for (Entry<K,V> e = tab[index] ; e != null ; e = e.next) {
+        for (Entry<K, V> e = tab[index]; e != null; e = e.next) {
             if ((e.hash == hash) && e.key.equals(key)) {
                 V old = e.value;
                 e.value = value;
@@ -537,7 +558,7 @@ public class Hashtable<K,V>
         }
 
         // Creates the new entry.
-        Entry<K,V> e = tab[index];
+        Entry<K, V> e = tab[index];
         tab[index] = new Entry<>(hash, key, value, e);
         count++;
         return null;
@@ -547,16 +568,16 @@ public class Hashtable<K,V>
      * Removes the key (and its corresponding value) from this
      * hashtable. This method does nothing if the key is not in the hashtable.
      *
-     * @param   key   the key that needs to be removed
-     * @return  the value to which the key had been mapped in this hashtable,
-     *          or <code>null</code> if the key did not have a mapping
-     * @throws  NullPointerException  if the key is <code>null</code>
+     * @param key the key that needs to be removed
+     * @return the value to which the key had been mapped in this hashtable,
+     * or <code>null</code> if the key did not have a mapping
+     * @throws NullPointerException if the key is <code>null</code>
      */
     public synchronized V remove(Object key) {
         Entry tab[] = table;
         int hash = hash(key);
         int index = (hash & 0x7FFFFFFF) % tab.length;
-        for (Entry<K,V> e = tab[index], prev = null ; e != null ; prev = e, e = e.next) {
+        for (Entry<K, V> e = tab[index], prev = null; e != null; prev = e, e = e.next) {
             if ((e.hash == hash) && e.key.equals(key)) {
                 modCount++;
                 if (prev != null) {
@@ -603,15 +624,15 @@ public class Hashtable<K,V>
      * hashtable itself is copied, but the keys and values are not cloned.
      * This is a relatively expensive operation.
      *
-     * @return  a clone of the hashtable
+     * @return a clone of the hashtable
      */
     public synchronized Object clone() {
         try {
-            Hashtable<K,V> t = (Hashtable<K,V>) super.clone();
+            Hashtable<K, V> t = (Hashtable<K, V>) super.clone();
             t.table = new Entry[table.length];
-            for (int i = table.length ; i-- > 0 ; ) {
+            for (int i = table.length; i-- > 0; ) {
                 t.table[i] = (table[i] != null)
-                    ? (Entry<K,V>) table[i].clone() : null;
+                        ? (Entry<K, V>) table[i].clone() : null;
             }
             t.keySet = null;
             t.entrySet = null;
@@ -632,7 +653,7 @@ public class Hashtable<K,V>
      * associated element, where the <tt>toString</tt> method is used to
      * convert the key and element to strings.
      *
-     * @return  a string representation of this hashtable
+     * @return a string representation of this hashtable
      */
     public synchronized String toString() {
         int max = size() - 1;
@@ -640,14 +661,14 @@ public class Hashtable<K,V>
             return "{}";
 
         StringBuilder sb = new StringBuilder();
-        Iterator<Map.Entry<K,V>> it = entrySet().iterator();
+        Iterator<Map.Entry<K, V>> it = entrySet().iterator();
 
         sb.append('{');
         for (int i = 0; ; i++) {
-            Map.Entry<K,V> e = it.next();
+            Map.Entry<K, V> e = it.next();
             K key = e.getKey();
             V value = e.getValue();
-            sb.append(key   == this ? "(this Map)" : key.toString());
+            sb.append(key == this ? "(this Map)" : key.toString());
             sb.append('=');
             sb.append(value == this ? "(this Map)" : value.toString());
 
@@ -682,7 +703,7 @@ public class Hashtable<K,V>
      * stateless, so there's no reason to create more than one of each.
      */
     private transient volatile Set<K> keySet = null;
-    private transient volatile Set<Map.Entry<K,V>> entrySet = null;
+    private transient volatile Set<Map.Entry<K, V>> entrySet = null;
     private transient volatile Collection<V> values = null;
 
     /**
@@ -700,6 +721,7 @@ public class Hashtable<K,V>
      *
      * @since 1.2
      */
+    //返回一个线程安全的SynchronizedSet
     public Set<K> keySet() {
         if (keySet == null)
             keySet = Collections.synchronizedSet(new KeySet(), this);
@@ -710,15 +732,19 @@ public class Hashtable<K,V>
         public Iterator<K> iterator() {
             return getIterator(KEYS);
         }
+
         public int size() {
             return count;
         }
+
         public boolean contains(Object o) {
             return containsKey(o);
         }
+
         public boolean remove(Object o) {
             return Hashtable.this.remove(o) != null;
         }
+
         public void clear() {
             Hashtable.this.clear();
         }
@@ -740,32 +766,32 @@ public class Hashtable<K,V>
      *
      * @since 1.2
      */
-    public Set<Map.Entry<K,V>> entrySet() {
-        if (entrySet==null)
+    public Set<Map.Entry<K, V>> entrySet() {
+        if (entrySet == null)
             entrySet = Collections.synchronizedSet(new EntrySet(), this);
         return entrySet;
     }
 
-    private class EntrySet extends AbstractSet<Map.Entry<K,V>> {
-        public Iterator<Map.Entry<K,V>> iterator() {
+    private class EntrySet extends AbstractSet<Map.Entry<K, V>> {
+        public Iterator<Map.Entry<K, V>> iterator() {
             return getIterator(ENTRIES);
         }
 
-        public boolean add(Map.Entry<K,V> o) {
+        public boolean add(Map.Entry<K, V> o) {
             return super.add(o);
         }
 
         public boolean contains(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
-            Map.Entry entry = (Map.Entry)o;
+            Map.Entry entry = (Map.Entry) o;
             Object key = entry.getKey();
             Entry[] tab = table;
             int hash = hash(key);
             int index = (hash & 0x7FFFFFFF) % tab.length;
 
             for (Entry e = tab[index]; e != null; e = e.next)
-                if (e.hash==hash && e.equals(entry))
+                if (e.hash == hash && e.equals(entry))
                     return true;
             return false;
         }
@@ -773,15 +799,15 @@ public class Hashtable<K,V>
         public boolean remove(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
-            Map.Entry<K,V> entry = (Map.Entry<K,V>) o;
+            Map.Entry<K, V> entry = (Map.Entry<K, V>) o;
             K key = entry.getKey();
             Entry[] tab = table;
             int hash = hash(key);
             int index = (hash & 0x7FFFFFFF) % tab.length;
 
-            for (Entry<K,V> e = tab[index], prev = null; e != null;
+            for (Entry<K, V> e = tab[index], prev = null; e != null;
                  prev = e, e = e.next) {
-                if (e.hash==hash && e.equals(entry)) {
+                if (e.hash == hash && e.equals(entry)) {
                     modCount++;
                     if (prev != null)
                         prev.next = e.next;
@@ -821,9 +847,9 @@ public class Hashtable<K,V>
      * @since 1.2
      */
     public Collection<V> values() {
-        if (values==null)
+        if (values == null)
             values = Collections.synchronizedCollection(new ValueCollection(),
-                                                        this);
+                    this);
         return values;
     }
 
@@ -831,12 +857,15 @@ public class Hashtable<K,V>
         public Iterator<V> iterator() {
             return getIterator(VALUES);
         }
+
         public int size() {
             return count;
         }
+
         public boolean contains(Object o) {
             return containsValue(o);
         }
+
         public void clear() {
             Hashtable.this.clear();
         }
@@ -848,7 +877,7 @@ public class Hashtable<K,V>
      * Compares the specified Object with this Map for equality,
      * as per the definition in the Map interface.
      *
-     * @param  o object to be compared for equality with this hashtable
+     * @param o object to be compared for equality with this hashtable
      * @return true if the specified Object is equal to this Map
      * @see Map#equals(Object)
      * @since 1.2
@@ -859,25 +888,25 @@ public class Hashtable<K,V>
 
         if (!(o instanceof Map))
             return false;
-        Map<K,V> t = (Map<K,V>) o;
+        Map<K, V> t = (Map<K, V>) o;
         if (t.size() != size())
             return false;
 
         try {
-            Iterator<Map.Entry<K,V>> i = entrySet().iterator();
+            Iterator<Map.Entry<K, V>> i = entrySet().iterator();
             while (i.hasNext()) {
-                Map.Entry<K,V> e = i.next();
+                Map.Entry<K, V> e = i.next();
                 K key = e.getKey();
                 V value = e.getValue();
                 if (value == null) {
-                    if (!(t.get(key)==null && t.containsKey(key)))
+                    if (!(t.get(key) == null && t.containsKey(key)))
                         return false;
                 } else {
                     if (!value.equals(t.get(key)))
                         return false;
                 }
             }
-        } catch (ClassCastException unused)   {
+        } catch (ClassCastException unused) {
             return false;
         } catch (NullPointerException unused) {
             return false;
@@ -910,7 +939,7 @@ public class Hashtable<K,V>
 
         loadFactor = -loadFactor;  // Mark hashCode computation in progress
         Entry[] tab = table;
-        for (Entry<K,V> entry : tab)
+        for (Entry<K, V> entry : tab)
             while (entry != null) {
                 h += entry.hashCode();
                 entry = entry.next;
@@ -924,11 +953,11 @@ public class Hashtable<K,V>
      * Save the state of the Hashtable to a stream (i.e., serialize it).
      *
      * @serialData The <i>capacity</i> of the Hashtable (the length of the
-     *             bucket array) is emitted (int), followed by the
-     *             <i>size</i> of the Hashtable (the number of key-value
-     *             mappings), followed by the key (Object) and value (Object)
-     *             for each key-value mapping represented by the Hashtable
-     *             The key-value mappings are emitted in no particular order.
+     * bucket array) is emitted (int), followed by the
+     * <i>size</i> of the Hashtable (the number of key-value
+     * mappings), followed by the key (Object) and value (Object)
+     * for each key-value mapping represented by the Hashtable
+     * The key-value mappings are emitted in no particular order.
      */
     private void writeObject(java.io.ObjectOutputStream s)
             throws IOException {
@@ -944,11 +973,11 @@ public class Hashtable<K,V>
 
             // Stack copies of the entries in the table
             for (int index = 0; index < table.length; index++) {
-                Entry<K,V> entry = table[index];
+                Entry<K, V> entry = table[index];
 
                 while (entry != null) {
                     entryStack =
-                        new Entry<>(0, entry.key, entry.value, entryStack);
+                            new Entry<>(0, entry.key, entry.value, entryStack);
                     entry = entry.next;
                 }
             }
@@ -966,8 +995,7 @@ public class Hashtable<K,V>
      * Reconstitute the Hashtable from a stream (i.e., deserialize it).
      */
     private void readObject(java.io.ObjectInputStream s)
-         throws IOException, ClassNotFoundException
-    {
+            throws IOException, ClassNotFoundException {
         // Read in the length, threshold, and loadfactor
         s.defaultReadObject();
 
@@ -979,21 +1007,21 @@ public class Hashtable<K,V>
         // no larger than the original size.  Make the length
         // odd if it's large enough, this helps distribute the entries.
         // Guard against the length ending up zero, that's not valid.
-        int length = (int)(elements * loadFactor) + (elements / 20) + 3;
+        int length = (int) (elements * loadFactor) + (elements / 20) + 3;
         if (length > elements && (length & 1) == 0)
             length--;
         if (origlength > 0 && length > origlength)
             length = origlength;
 
-        Entry<K,V>[] newTable = new Entry[length];
+        Entry<K, V>[] newTable = new Entry[length];
         threshold = (int) Math.min(length * loadFactor, MAX_ARRAY_SIZE + 1);
         count = 0;
         initHashSeedAsNeeded(length);
 
         // Read the number of elements and then all the key/value objects
         for (; elements > 0; elements--) {
-            K key = (K)s.readObject();
-            V value = (V)s.readObject();
+            K key = (K) s.readObject();
+            V value = (V) s.readObject();
             // synch could be eliminated for performance
             reconstitutionPut(newTable, key, value);
         }
@@ -1004,16 +1032,15 @@ public class Hashtable<K,V>
      * The put method used by readObject. This is provided because put
      * is overridable and should not be called in readObject since the
      * subclass will not yet be initialized.
-     *
+     * <p>
      * <p>This differs from the regular put method in several ways. No
      * checking for rehashing is necessary since the number of elements
      * initially in the table is known. The modCount is not incremented
      * because we are creating a new instance. Also, no return value
      * is needed.
      */
-    private void reconstitutionPut(Entry<K,V>[] tab, K key, V value)
-        throws StreamCorruptedException
-    {
+    private void reconstitutionPut(Entry<K, V>[] tab, K key, V value)
+            throws StreamCorruptedException {
         if (value == null) {
             throw new java.io.StreamCorruptedException();
         }
@@ -1021,13 +1048,13 @@ public class Hashtable<K,V>
         // This should not happen in deserialized version.
         int hash = hash(key);
         int index = (hash & 0x7FFFFFFF) % tab.length;
-        for (Entry<K,V> e = tab[index] ; e != null ; e = e.next) {
+        for (Entry<K, V> e = tab[index]; e != null; e = e.next) {
             if ((e.hash == hash) && e.key.equals(key)) {
                 throw new java.io.StreamCorruptedException();
             }
         }
         // Creates the new entry.
-        Entry<K,V> e = tab[index];
+        Entry<K, V> e = tab[index];
         tab[index] = new Entry<>(hash, key, value, e);
         count++;
     }
@@ -1035,22 +1062,22 @@ public class Hashtable<K,V>
     /**
      * Hashtable bucket collision list entry
      */
-    private static class Entry<K,V> implements Map.Entry<K,V> {
+    private static class Entry<K, V> implements Map.Entry<K, V> {
         int hash;
         final K key;
         V value;
-        Entry<K,V> next;
+        Entry<K, V> next;
 
-        protected Entry(int hash, K key, V value, Entry<K,V> next) {
+        protected Entry(int hash, K key, V value, Entry<K, V> next) {
             this.hash = hash;
-            this.key =  key;
+            this.key = key;
             this.value = value;
             this.next = next;
         }
 
         protected Object clone() {
             return new Entry<>(hash, key, value,
-                                  (next==null ? null : (Entry<K,V>) next.clone()));
+                    (next == null ? null : (Entry<K, V>) next.clone()));
         }
 
         // Map.Entry Ops
@@ -1075,7 +1102,7 @@ public class Hashtable<K,V>
         public boolean equals(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
-            Map.Entry<?,?> e = (Map.Entry)o;
+            Map.Entry<?, ?> e = (Map.Entry) o;
 
             return key.equals(e.getKey()) && value.equals(e.getValue());
         }
@@ -1085,7 +1112,7 @@ public class Hashtable<K,V>
         }
 
         public String toString() {
-            return key.toString()+"="+value.toString();
+            return key.toString() + "=" + value.toString();
         }
     }
 
@@ -1104,8 +1131,8 @@ public class Hashtable<K,V>
     private class Enumerator<T> implements Enumeration<T>, Iterator<T> {
         Entry[] table = Hashtable.this.table;
         int index = table.length;
-        Entry<K,V> entry = null;
-        Entry<K,V> lastReturned = null;
+        Entry<K, V> entry = null;
+        Entry<K, V> lastReturned = null;
         int type;
 
         /**
@@ -1127,7 +1154,7 @@ public class Hashtable<K,V>
         }
 
         public boolean hasMoreElements() {
-            Entry<K,V> e = entry;
+            Entry<K, V> e = entry;
             int i = index;
             Entry[] t = table;
             /* Use locals for faster loop iteration */
@@ -1140,7 +1167,7 @@ public class Hashtable<K,V>
         }
 
         public T nextElement() {
-            Entry<K,V> et = entry;
+            Entry<K, V> et = entry;
             int i = index;
             Entry[] t = table;
             /* Use locals for faster loop iteration */
@@ -1150,9 +1177,9 @@ public class Hashtable<K,V>
             entry = et;
             index = i;
             if (et != null) {
-                Entry<K,V> e = lastReturned = entry;
+                Entry<K, V> e = lastReturned = entry;
                 entry = e.next;
-                return type == KEYS ? (T)e.key : (type == VALUES ? (T)e.value : (T)e);
+                return type == KEYS ? (T) e.key : (type == VALUES ? (T) e.value : (T) e);
             }
             throw new NoSuchElementException("Hashtable Enumerator");
         }
@@ -1176,11 +1203,11 @@ public class Hashtable<K,V>
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
 
-            synchronized(Hashtable.this) {
+            synchronized (Hashtable.this) {
                 Entry[] tab = Hashtable.this.table;
                 int index = (lastReturned.hash & 0x7FFFFFFF) % tab.length;
 
-                for (Entry<K,V> e = tab[index], prev = null; e != null;
+                for (Entry<K, V> e = tab[index], prev = null; e != null;
                      prev = e, e = e.next) {
                     if (e == lastReturned) {
                         modCount++;
