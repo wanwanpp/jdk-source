@@ -83,7 +83,7 @@ package java.util;
  * @see     HashMap
  * @since   1.2
  */
-
+//基于HashMap实现
 public class HashSet<E>
     extends AbstractSet<E>
     implements Set<E>, Cloneable, java.io.Serializable

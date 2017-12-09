@@ -1,9 +1,6 @@
 package com.jdk.test;
 
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * @author ÍõÆ¼

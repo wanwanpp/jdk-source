@@ -123,7 +123,7 @@ package java.util;
  * @see     AbstractCollection
  * @since 1.2
  */
-
+//定义了集合对象的基本操作方法
 public interface Collection<E> extends Iterable<E> {
     // Query Operations
 
