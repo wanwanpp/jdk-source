@@ -20,7 +20,7 @@ public class TestWaitNotify {
                     } catch (InterruptedException e) {
                         //catch执行捕捉异常后的处理
 
-//                        System.out.println("waitThread线程被中断了");
+                        System.out.println("waitThread线程被中断了");
                         e.printStackTrace();
                         try {
                             Thread.sleep(100);
