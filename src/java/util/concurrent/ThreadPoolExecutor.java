@@ -315,6 +315,7 @@ import java.util.*;
  * @author Doug Lea
  * @since 1.5
  */
+//http://www.importnew.com/19011.html
 public class ThreadPoolExecutor extends AbstractExecutorService {
     /**
      * The main pool control state, ctl, is an atomic integer packing
@@ -471,6 +472,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * return null even if it may later return non-null when delays
      * expire.
      */
+    //任务缓存队列
     private final BlockingQueue<Runnable> workQueue;
 
     /**
@@ -486,12 +488,14 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * ensuring workers set is stable while separately checking
      * permission to interrupt and actually interrupting.
      */
+    //对线程池状态（比如线程池大小、runState等）的改变都要使用这个锁
     private final ReentrantLock mainLock = new ReentrantLock();
 
     /**
      * Set containing all worker threads in pool. Accessed only when
      * holding mainLock.
      */
+    //工作线程集合
     private final HashSet<Worker> workers = new HashSet<Worker>();
 
     /**
@@ -510,6 +514,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * Counter for completed tasks. Updated only on termination of
      * worker threads. Accessed only under mainLock.
      */
+    //完成的任务数
     private long completedTaskCount;
 
     /*
@@ -536,11 +541,13 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * will likely be enough memory available for the cleanup code to
      * complete without encountering yet another OutOfMemoryError.
      */
+    //线程工厂
     private volatile ThreadFactory threadFactory;
 
     /**
      * Handler called when saturated or shutdown in execute.
      */
+    //拒绝策略
     private volatile RejectedExecutionHandler handler;
 
     /**
@@ -549,6 +556,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * present or if allowCoreThreadTimeOut. Otherwise they wait
      * forever for new work.
      */
+//    空闲时间
     private volatile long keepAliveTime;
 
     /**
@@ -563,12 +571,14 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * (and not allow to time out etc) unless allowCoreThreadTimeOut
      * is set, in which case the minimum is zero.
      */
+    //核心线程数
     private volatile int corePoolSize;
 
     /**
      * Maximum pool size. Note that the actual maximum is internally
      * bounded by CAPACITY.
      */
+    //最大线程数
     private volatile int maximumPoolSize;
 
     /**
@@ -636,7 +646,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         /**
          * Per-thread task counter
          */
-        //每个线程的任务计数器
+        //每个工作线程的任务计数器
         volatile long completedTasks;
 
         /**
@@ -1200,6 +1210,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                     beforeExecute(wt, task);                //空实现
                     Throwable thrown = null;
                     try {
+
+                        //调用任务的run()方法
                         task.run();
                     } catch (RuntimeException x) {
                         thrown = x;
@@ -1419,7 +1431,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
 
         int c = ctl.get();
         if (workerCountOf(c) < corePoolSize) {
-            if (addWorker(command, true))//如果 true，则使用 corePoolSize 作为边界，否则使用 maximumPoolSize 作为边界
+            if (addWorker(command, true))//第二个参数true表示使用 corePoolSize 作为边界，否则使用 maximumPoolSize 作为边界
                 return;
             //第二次执行ctl.get()，确保c的值是最新的，双重检查。
             c = ctl.get();

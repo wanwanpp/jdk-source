@@ -467,6 +467,7 @@ public class ThreadLocal<T> {
 
                 if (k == null) {
                     //k==null说明这个key已经被GC了，可以用新的key，value将这个Entry替换了。
+                    //手动调用Entry的clear方法也会使ThreadLocal为null。
                     replaceStaleEntry(key, value, i);
                     return;
                 }
