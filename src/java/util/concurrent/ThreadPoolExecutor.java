@@ -1015,7 +1015,10 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                     mainLock.unlock();
                 }
                 if (workerAdded) {
-                    t.start();   //执行runWorker()方法。里面有beforeExecutor，afterExecutor方法。在commond.run()方法的前后执行。
+                    //执行runWorker()方法。里面有beforeExecutor，afterExecutor方法。在commond.run()方法的前后执行。
+                    //在调用Worker的构造函数时，this.thread = getThreadFactory().newThread(this);这一句会将Worker当做
+                    // 一个任务（Worker实现了Runnable接口），所以t.start()会调用Worker的run方法执行runWorker。
+                    t.start();
                     workerStarted = true;
                 }
             }
@@ -1188,6 +1191,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      *
      * @param w the worker
      */
+    //final修饰，不让重写
     final void runWorker(Worker w) {
         Thread wt = Thread.currentThread();
         Runnable task = w.firstTask;
@@ -1431,6 +1435,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
 
         int c = ctl.get();
         if (workerCountOf(c) < corePoolSize) {
+            //addWorker可能会失败，可能其他线程也调用了execute在此时获得时间片添加了Worker使得线程数大于等于核心线程数
             if (addWorker(command, true))//第二个参数true表示使用 corePoolSize 作为边界，否则使用 maximumPoolSize 作为边界
                 return;
             //第二次执行ctl.get()，确保c的值是最新的，双重检查。
