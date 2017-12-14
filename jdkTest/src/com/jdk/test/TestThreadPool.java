@@ -23,6 +23,8 @@ public class TestThreadPool {
         executor.shutdown();
         Thread.sleep(2500);
         executor.shutdownNow();
+        System.out.println(executor.isTerminated());
+        System.out.println(executor.isTerminating());
     }
 
     public static class Task implements Runnable {

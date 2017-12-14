@@ -850,7 +850,9 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
             for (Worker w : workers) {
                 Thread t = w.thread;
                 //Worker继承了AbstractQueuedSynchronizer类。
-                if (!t.isInterrupted() && w.tryLock()) {       //w.tryWork()方法，若worker空闲就会返回true，否则为false。
+                //工作线程在运行任务前会获取锁然后执行，执行完后释放锁。
+                // 若w.tryLock()返回false则表明该工作线程一定处于运行而非空闲状态。
+                if (!t.isInterrupted() && w.tryLock()) {
                     try {
                         t.interrupt();
                     } catch (SecurityException ignore) {
