@@ -4,7 +4,8 @@ package com.jdk.test;
  * @author 王萍
  * @date 2017/12/9 0009
  */
-//java.lang.IllegalMonitorStateException异常：尝试等待一个对象的监视器或者去通知其他正在等待这个对象监视器的线程，但是没有拥有这个监视器的所有权。
+//java.lang.IllegalMonitorStateException异常：尝试等待一个对象的监视器或者去通知其他正在等待这个对象监视器的线程，
+// 但是没有拥有这个监视器的所有权。即未获取锁就调用wait或者notify
 public class TestWaitNotify {
 
     public static Object object = new Object();
