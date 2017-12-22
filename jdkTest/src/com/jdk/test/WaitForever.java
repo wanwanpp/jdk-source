@@ -31,8 +31,8 @@ public class WaitForever {
 
         Thread.sleep(100);
 //        模拟锁资源被占用。
-//        synchronized (monitor) {
-//            Thread.sleep(5000);
-//        }
+        synchronized (monitor) {
+            Thread.sleep(500000);
+        }
     }
 }

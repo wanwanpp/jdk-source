@@ -242,6 +242,7 @@ public class Thread implements Runnable {
         synchronized (blockerLock) {
             blocker = b;
         }
+        String a = new String("fdafa");
     }
 
     /**
