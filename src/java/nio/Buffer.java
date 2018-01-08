@@ -171,6 +171,9 @@ package java.nio;
  * @since 1.4
  */
 
+/**
+ * 主要是对mark，position，，limit，capacity四个属性的操作
+ */
 public abstract class Buffer {
 
     // Invariants: mark <= position <= limit <= capacity
@@ -379,6 +382,7 @@ public abstract class Buffer {
      *
      * @return  The number of elements remaining in this buffer
      */
+    //返回buffer中剩余元素数量。
     public final int remaining() {
         return limit - position;
     }
