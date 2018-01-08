@@ -1116,13 +1116,15 @@ public abstract class CharBuffer
      * @return  <tt>true</tt> if, and only if, this buffer is equal to the
      *           given object
      */
+    // 1.remain相同（即剩余元素个数相同）
+    // 2.剩余元素都相同
     public boolean equals(Object ob) {
         if (this == ob)
             return true;
         if (!(ob instanceof CharBuffer))
             return false;
         CharBuffer that = (CharBuffer)ob;
-        if (this.remaining() != that.remaining())
+        if (this.remaining() != that.remaining())  //remain = limit - position
             return false;
         int p = this.position();
         for (int i = this.limit() - 1, j = that.limit() - 1; i >= p; i--, j--)
@@ -1132,11 +1134,7 @@ public abstract class CharBuffer
     }
 
     private static boolean equals(char x, char y) {
-
-
-
         return x == y;
-
     }
 
     /**
