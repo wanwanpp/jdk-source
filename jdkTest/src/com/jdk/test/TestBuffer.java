@@ -20,7 +20,6 @@ public class TestBuffer {
 
         print(buffer);
         buffer.flip();
-
         print(buffer);
 
         while (buffer.hasRemaining()) {
@@ -30,6 +29,8 @@ public class TestBuffer {
         System.out.println(buffer.get(2));
         print(buffer);
 
+//        创建一个视图缓冲区，与原始缓冲区共享数据元素。操作会影响原始缓冲区。
+        buffer.duplicate();
     }
 
     public static void print(Buffer buffer) {

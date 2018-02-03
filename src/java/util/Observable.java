@@ -156,6 +156,7 @@ public class Observable {
         }
 
         for (int i = arrLocal.length-1; i>=0; i--)
+            //调用observer的update方法。
             ((Observer)arrLocal[i]).update(this, arg);
     }
 
