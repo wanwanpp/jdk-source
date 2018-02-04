@@ -411,6 +411,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @param str a string.
      * @return a reference to this object.
      */
+    //建造者模式
     public AbstractStringBuilder append(String str) {
         if (str == null) str = "null";
         int len = str.length();

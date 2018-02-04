@@ -62,6 +62,7 @@ public abstract class InputStream implements Closeable {
      *             stream is reached.
      * @exception  IOException  if an I/O error occurs.
      */
+    //模板方法模式
     public abstract int read() throws IOException;
 
     /**
