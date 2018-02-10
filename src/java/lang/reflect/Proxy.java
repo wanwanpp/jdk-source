@@ -25,24 +25,18 @@
 
 package java.lang.reflect;
 
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
-import java.security.AccessController;
-import java.security.Permission;
-import java.security.PrivilegedAction;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.List;
-import java.util.WeakHashMap;
 import sun.misc.ProxyGenerator;
 import sun.reflect.CallerSensitive;
 import sun.reflect.Reflection;
 import sun.reflect.misc.ReflectUtil;
 import sun.security.util.SecurityConstants;
+
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
+import java.security.AccessController;
+import java.security.Permission;
+import java.security.PrivilegedAction;
+import java.util.*;
 
 /**
  * {@code Proxy} provides static methods for creating dynamic proxy
@@ -624,6 +618,7 @@ public class Proxy implements java.io.Serializable {
                 synchronized (nextUniqueNumberLock) {
                     num = nextUniqueNumber++;
                 }
+                //生成代理类的完全限定名
                 String proxyName = proxyPkg + proxyClassNamePrefix + num;
                 /*
                  * Verify that the class loader hasn't already
@@ -632,6 +627,7 @@ public class Proxy implements java.io.Serializable {
 
                 /*
                  * Generate the specified proxy class.
+                 * 生成代理类的字节码的地方
                  */
                 byte[] proxyClassFile = ProxyGenerator.generateProxyClass(
                     proxyName, interfaces);
@@ -718,6 +714,7 @@ public class Proxy implements java.io.Serializable {
 
         /*
          * Look up or generate the designated proxy class.
+         * 重点，动态生成class的地方
          */
         Class<?> cl = getProxyClass0(loader, interfaces);
 
@@ -725,6 +722,7 @@ public class Proxy implements java.io.Serializable {
          * Invoke its constructor with the designated invocation handler.
          */
         try {
+            //获取含有InvacationHandler参数的构造方法。
             final Constructor<?> cons = cl.getConstructor(constructorParams);
             final InvocationHandler ih = h;
             if (sm != null && ProxyAccessHelper.needsNewInstanceCheck(cl)) {
@@ -736,6 +734,7 @@ public class Proxy implements java.io.Serializable {
                     }
                 });
             } else {
+                //cons.newInstance(new Object[] {h} )  反射生成
                 return newInstance(cons, ih);
             }
         } catch (NoSuchMethodException e) {
