@@ -1436,7 +1436,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
          */
 
         int c = ctl.get();
-        if (workerCountOf(c) < corePoolSize) {
+        if (workerCountOf(c) < corePoolSize) {//工作线程数小于核心线程数
             //addWorker可能会失败，可能其他线程也调用了execute在此时获得时间片添加了Worker使得线程数大于等于核心线程数
             if (addWorker(command, true))//第二个参数true表示使用 corePoolSize 作为边界，否则使用 maximumPoolSize 作为边界
                 return;

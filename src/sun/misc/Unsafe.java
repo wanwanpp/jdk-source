@@ -1140,6 +1140,7 @@ public final class Unsafe {
 
     /**
      * Ordered/Lazy version of {@link #putIntVolatile(Object, long, int)}
+     * lazySet版本，AtomicInteger中的lazySet方法。
      */
     public native void putOrderedInt(Object o, long offset, int x);
 
