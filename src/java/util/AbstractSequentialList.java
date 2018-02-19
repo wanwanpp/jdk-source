@@ -66,6 +66,12 @@ package java.util;
  * @since 1.2
  */
 
+/**
+ * 与AbstractList 的 区别：
+ *      AbstractList将set/get/add/remove留给子类实现，自己提供了迭代器的实现，且迭代器依赖于这四个方法。适合可按索引随机访问的结构
+ *      AbstractSequentialList 则 相反，set/get/add/remove依赖于迭代器的实现，迭代器交给子类来实现。适合按顺序访问的存储结构，如LinkedList。
+ * @param <E>
+ */
 public abstract class AbstractSequentialList<E> extends AbstractList<E> {
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
@@ -83,6 +89,7 @@ public abstract class AbstractSequentialList<E> extends AbstractList<E> {
      *
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
+    //使用迭代器连续的获取
     public E get(int index) {
         try {
             return listIterator(index).next();

@@ -64,5 +64,9 @@ package java.util;
  *
  * @since 1.4
  */
+
+/**
+ * 一个标志接口
+ */
 public interface RandomAccess {
 }
