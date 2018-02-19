@@ -92,6 +92,7 @@ public abstract class AbstractQueue<E>
      * @throws IllegalArgumentException if some property of this element
      *         prevents it from being added to this queue
      */
+    //使用offer方法，不成功就抛出异常
     public boolean add(E e) {
         if (offer(e))
             return true;
@@ -110,6 +111,7 @@ public abstract class AbstractQueue<E>
      * @return the head of this queue
      * @throws NoSuchElementException if this queue is empty
      */
+    //使用poll方法，不成功就抛出异常
     public E remove() {
         E x = poll();
         if (x != null)
@@ -129,6 +131,7 @@ public abstract class AbstractQueue<E>
      * @return the head of this queue
      * @throws NoSuchElementException if this queue is empty
      */
+    //使用peek方法，不成功就抛出异常
     public E element() {
         E x = peek();
         if (x != null)
@@ -144,6 +147,7 @@ public abstract class AbstractQueue<E>
      * <p>This implementation repeatedly invokes {@link #poll poll} until it
      * returns <tt>null</tt>.
      */
+    //一直调用poll方法。即一直删除队头元素
     public void clear() {
         while (poll() != null)
             ;
