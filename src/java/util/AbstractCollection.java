@@ -58,6 +58,9 @@ package java.util;
  * @since 1.2
  */
 
+/**
+ * 实现了 Collection中定义的部分方法
+ */
 public abstract class AbstractCollection<E> implements Collection<E> {
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
@@ -94,6 +97,9 @@ public abstract class AbstractCollection<E> implements Collection<E> {
      *
      * @throws ClassCastException   {@inheritDoc}
      * @throws NullPointerException {@inheritDoc}
+     */
+    /**
+     * 迭代判断
      */
     public boolean contains(Object o) {
         Iterator<E> it = iterator();
@@ -204,6 +210,9 @@ public abstract class AbstractCollection<E> implements Collection<E> {
      * Attempts to allocate larger arrays may result in
      * OutOfMemoryError: Requested array size exceeds VM limit
      */
+    /**
+     * 数组中还有其他的内容会占用一点空间，因此不能为Integer.MAX_VALUE
+     */
     private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
     /**
@@ -276,6 +285,9 @@ public abstract class AbstractCollection<E> implements Collection<E> {
      * @throws ClassCastException            {@inheritDoc}
      * @throws NullPointerException          {@inheritDoc}
      */
+    /**
+     * 调用迭代器的remove方法。
+     */
     public boolean remove(Object o) {
         Iterator<E> it = iterator();
         if (o==null) {
@@ -310,6 +322,9 @@ public abstract class AbstractCollection<E> implements Collection<E> {
      * @throws ClassCastException            {@inheritDoc}
      * @throws NullPointerException          {@inheritDoc}
      * @see #contains(Object)
+     */
+    /**
+     * 遍历传入的集合，看是否每个元素都在其中
      */
     public boolean containsAll(Collection<?> c) {
         for (Object e : c)
@@ -398,6 +413,10 @@ public abstract class AbstractCollection<E> implements Collection<E> {
      * @see #remove(Object)
      * @see #contains(Object)
      */
+    /**
+     * 若不在集合c中，就删除元素。
+     * 相当于求了交集
+     */
     public boolean retainAll(Collection<?> c) {
         boolean modified = false;
         Iterator<E> it = iterator();
@@ -424,6 +443,9 @@ public abstract class AbstractCollection<E> implements Collection<E> {
      * <tt>remove</tt> method and this collection is non-empty.
      *
      * @throws UnsupportedOperationException {@inheritDoc}
+     */
+    /**
+     * 使用迭代器删除所有的元素
      */
     public void clear() {
         Iterator<E> it = iterator();

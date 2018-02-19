@@ -8,7 +8,8 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 public class TestAtomicReferenceFieldUpdate {
 
-    private static final AtomicReferenceFieldUpdater<Node, Node> NEXT_UPDATE = AtomicReferenceFieldUpdater.newUpdater(Node.class, Node.class, "next");
+    private static final AtomicReferenceFieldUpdater<Node, Node> NEXT_UPDATE = AtomicReferenceFieldUpdater
+            .newUpdater(Node.class, Node.class, "next");  //第一个Node.class是field的持有对象类型，第二个是field的类型。
 
     public static void main(String[] args) {
         Node<Integer> integerNode = new Node<Integer>(3);

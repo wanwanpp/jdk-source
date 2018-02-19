@@ -35,13 +35,10 @@
 
 package java.util.concurrent;
 
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.AbstractQueue;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 /**
  * An optionally-bounded {@linkplain BlockingQueue blocking queue} based on
@@ -135,7 +132,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
     /**
      * The capacity bound, or Integer.MAX_VALUE if none
      */
-    //ÈÝÁ¿
+    //ï¿½ï¿½ï¿½ï¿½
     private final int capacity;
 
     /**
