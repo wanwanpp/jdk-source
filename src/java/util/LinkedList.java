@@ -135,10 +135,12 @@ public class LinkedList<E>
     /**
      * Links e as last element.
      */
+    //类似普通的添加节点，考虑list为空的情况，更新size和modCount
     void linkLast(E e) {
         final Node<E> l = last;
         final Node<E> newNode = new Node<>(l, e, null);
         last = newNode;
+        //考虑last为null的情况
         if (l == null)
             first = newNode;
         else
@@ -150,6 +152,7 @@ public class LinkedList<E>
     /**
      * Inserts element e before non-null Node succ.
      */
+    //先得到succ的前驱，然后获取根据e,pred,succ生成newNode，再更新pred的next、succ的pred。再更新size、modCount的值。
     void linkBefore(E e, Node<E> succ) {
         // assert succ != null;
         final Node<E> pred = succ.prev;
@@ -204,13 +207,14 @@ public class LinkedList<E>
     /**
      * Unlinks non-null node x.
      */
+    //注意判断next和prev是否为null。
     E unlink(Node<E> x) {
         // assert x != null;
         final E element = x.item;
         final Node<E> next = x.next;
         final Node<E> prev = x.prev;
 
-        if (prev == null) {
+        if (prev == null) {//为什么这里不需要想下面else里面写x.prev=null?，因为这个条件下x.prev本身就是null了。
             first = next;
         } else {
             prev.next = next;
@@ -350,6 +354,9 @@ public class LinkedList<E>
      * @param o element to be removed from this list, if present
      * @return {@code true} if this list contained the specified element
      */
+    //与ArrayList的remove不同，ArrayList是通过索引操作，而这里是获取具体元素来操作。
+    //ArrayList的remove(Object)需要先得到object的index，然后操作。
+    //而LinkedList相反，其remove(index)需要先得到index处的object，然后操作。
     public boolean remove(Object o) {
         if (o == null) {
             for (Node<E> x = first; x != null; x = x.next) {
@@ -400,6 +407,7 @@ public class LinkedList<E>
      * @throws IndexOutOfBoundsException {@inheritDoc}
      * @throws NullPointerException if the specified collection is null
      */
+    //与add(int,E)差不多
     public boolean addAll(int index, Collection<? extends E> c) {
         checkPositionIndex(index);
 
@@ -408,6 +416,7 @@ public class LinkedList<E>
         if (numNew == 0)
             return false;
 
+        //找出pred和succ
         Node<E> pred, succ;
         if (index == size) {
             succ = null;
@@ -417,6 +426,7 @@ public class LinkedList<E>
             pred = succ.prev;
         }
 
+        //将c中的元素串起来
         for (Object o : a) {
             @SuppressWarnings("unchecked") E e = (E) o;
             Node<E> newNode = new Node<>(pred, e, null);
@@ -427,6 +437,7 @@ public class LinkedList<E>
             pred = newNode;
         }
 
+        //根据不同情况处理c中最后一个元素与后半部分（可能后半部分为null）第一个元素的连接
         if (succ == null) {
             last = pred;
         } else {
@@ -449,12 +460,13 @@ public class LinkedList<E>
         //   more than one generation
         // - is sure to free memory even if there is a reachable Iterator
         for (Node<E> x = first; x != null; ) {
-            Node<E> next = x.next;
+            Node<E> next = x.next;//先记录住next节点。
             x.item = null;
             x.next = null;
             x.prev = null;
             x = next;
         }
+        //更新first、last、size、modCount变量。
         first = last = null;
         size = 0;
         modCount++;
@@ -470,6 +482,7 @@ public class LinkedList<E>
      * @return the element at the specified position in this list
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
+    //检查索引后调用node（index）方法查找。
     public E get(int index) {
         checkElementIndex(index);
         return node(index).item;
@@ -484,6 +497,7 @@ public class LinkedList<E>
      * @return the element previously at the specified position
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
+    //需要根据索引找到具体元素后，再进行值的更新。
     public E set(int index, E element) {
         checkElementIndex(index);
         Node<E> x = node(index);
@@ -501,7 +515,9 @@ public class LinkedList<E>
      * @param element element to be inserted
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
+    //判断index是不是最后一个，然后根据不同的方法添加元素。
     public void add(int index, E element) {
+        //检查index
         checkPositionIndex(index);
 
         if (index == size)
@@ -561,15 +577,18 @@ public class LinkedList<E>
     /**
      * Returns the (non-null) Node at the specified element index.
      */
+    //返回index处的节点，一个节点一个节点的连续查找。
     Node<E> node(int index) {
         // assert isElementIndex(index);
 
+        //在前半部分，从前往后找
         if (index < (size >> 1)) {
             Node<E> x = first;
             for (int i = 0; i < index; i++)
                 x = x.next;
             return x;
         } else {
+            //在后半部分，从后往前找
             Node<E> x = last;
             for (int i = size - 1; i > index; i--)
                 x = x.prev;
@@ -590,6 +609,7 @@ public class LinkedList<E>
      * @return the index of the first occurrence of the specified element in
      *         this list, or -1 if this list does not contain the element
      */
+    //从前往后遍历查找
     public int indexOf(Object o) {
         int index = 0;
         if (o == null) {
@@ -619,6 +639,7 @@ public class LinkedList<E>
      * @return the index of the last occurrence of the specified element in
      *         this list, or -1 if this list does not contain the element
      */
+    //从后往前遍历查找。
     public int lastIndexOf(Object o) {
         int index = size;
         if (o == null) {
@@ -954,6 +975,9 @@ public class LinkedList<E>
         }
     }
 
+    /**
+     * 表示节点
+     */
     private static class Node<E> {
         E item;
         Node<E> next;
