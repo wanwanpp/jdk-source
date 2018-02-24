@@ -359,6 +359,7 @@ public class HashMap<K, V>
      * otherwise encounter collisions for hashCodes that do not differ
      * in lower bits. Note: Null keys always map to hash 0, thus index 0.
      */
+    //获取key的hash值。
     final int hash(Object k) {
         int h = hashSeed;
         if (0 != h && k instanceof String) {
@@ -419,6 +420,11 @@ public class HashMap<K, V>
      *
      * @see #put(Object, Object)
      */
+    /**
+     * 两种情况：
+     * 1. key为null
+     * 2. key不为null
+     */
     public V get(Object key) {
         if (key == null)
             //在table[0]中找null。
@@ -435,6 +441,7 @@ public class HashMap<K, V>
      * operations (get and put), but incorporated with conditionals in
      * others.
      */
+    //在table[0]中去找key为null的value
     private V getForNullKey() {
         if (size == 0) {
             return null;
@@ -454,6 +461,7 @@ public class HashMap<K, V>
      * @return <tt>true</tt> if this map contains a mapping for the specified
      * key.
      */
+    //调用getEntry方法看是否能找到key对应的Entry。
     public boolean containsKey(Object key) {
         return getEntry(key) != null;
     }
@@ -463,18 +471,20 @@ public class HashMap<K, V>
      * HashMap.  Returns null if the HashMap contains no mapping
      * for the key.
      */
+    /**
+     * 1. 算hash值
+     * 2. 根据hash找其bucketIndex
+     * 3. 在对应bucket中遍历链表中的Entry，看是否有相同的key，有则返回Entry，没有则返回null。
+     */
     final Entry<K, V> getEntry(Object key) {
         if (size == 0) {
             return null;
         }
 
         int hash = (key == null) ? 0 : hash(key);
-        for (Entry<K, V> e = table[indexFor(hash, table.length)];
-             e != null;
-             e = e.next) {
+        for (Entry<K, V> e = table[indexFor(hash, table.length)]; e != null; e = e.next) {
             Object k;
-            if (e.hash == hash &&
-                    ((k = e.key) == key || (key != null && key.equals(k))))
+            if (e.hash == hash && ((k = e.key) == key || (key != null && key.equals(k))))
                 return e;
         }
         return null;
@@ -594,6 +604,12 @@ public class HashMap<K, V>
      *                    capacity is MAXIMUM_CAPACITY (in which case value
      *                    is irrelevant).
      */
+    /**
+     * 1. 创建newCapacity大小的newTable
+     * 2. 调用transfer方法将原table中的元素迁移到newTable
+     * 3. table=newTable;
+     * 4. 更新threshold的值。
+     */
     void resize(int newCapacity) {
         Entry[] oldTable = table;
         int oldCapacity = oldTable.length;
@@ -613,6 +629,9 @@ public class HashMap<K, V>
     /**
      * Transfers all entries from current table to newTable.
      */
+    /**
+     * 遍历原map，将各Entry重新计算bucket放入newTable中。
+     */
     void transfer(Entry[] newTable, boolean rehash) {
         int newCapacity = newTable.length;
         for (Entry<K, V> e : table) {//竖着遍历原table
@@ -625,7 +644,8 @@ public class HashMap<K, V>
                 //newTable[i]表示bucket[i]的第一个Entry
                 e.next = newTable[i];
                 newTable[i] = e;
-                e = next;        //这一步是配合while(null != e) 向后遍历原table的bucket。
+                //这一步是配合while(null != e) 向后遍历原table的bucket。
+                e = next;
             }
         }
     }
@@ -637,6 +657,9 @@ public class HashMap<K, V>
      *
      * @param m mappings to be stored in this map
      * @throws NullPointerException if the specified map is null
+     */
+    /**
+     * 将参数Map中的Entry一个一个的put进入当前Map中。
      */
     public void putAll(Map<? extends K, ? extends V> m) {
         int numKeysToBeAdded = m.size();
@@ -690,6 +713,11 @@ public class HashMap<K, V>
      * in the HashMap.  Returns null if the HashMap contains no mapping
      * for this key.
      */
+    /**
+     * 1. 获取hash
+     * 2. 得到bucketIndex
+     * 3. 寻找key代表的Entry，若此Entry是头结点，就使table[i]=next; 若不是头结点，就prev.next=next;
+     */
     final Entry<K, V> removeEntryForKey(Object key) {
         if (size == 0) {
             return null;
@@ -699,16 +727,16 @@ public class HashMap<K, V>
         Entry<K, V> prev = table[i];
         Entry<K, V> e = prev;
 
+        //遍历链表
         while (e != null) {
             Entry<K, V> next = e.next;
             Object k;
-            if (e.hash == hash &&
-                    ((k = e.key) == key || (key != null && key.equals(k)))) {
+            if (e.hash == hash && ((k = e.key) == key || (key != null && key.equals(k)))) {
                 modCount++;
                 size--;
-                if (prev == e)
+                if (prev == e)//若要删除的key是bucket中链表的第一个节点
                     table[i] = next;
-                else
+                else              //若要删除的key'是后面的节点
                     prev.next = next;
                 e.recordRemoval(this);
                 return e;
@@ -716,7 +744,7 @@ public class HashMap<K, V>
             prev = e;
             e = next;
         }
-
+        //这里的e等于null
         return e;
     }
 
@@ -758,6 +786,9 @@ public class HashMap<K, V>
      * Removes all of the mappings from this map.
      * The map will be empty after this call returns.
      */
+    /**
+     * 使用Arrays的fill方法，将table中所有元素赋值为null。更新size。
+     */
     public void clear() {
         modCount++;
         Arrays.fill(table, null);
@@ -772,10 +803,12 @@ public class HashMap<K, V>
      * @return <tt>true</tt> if this map maps one or more keys to the
      * specified value
      */
+    /**
+     * 按table顺序遍历map中Entry，对比value与Entry的value是否相同。
+     */
     public boolean containsValue(Object value) {
         if (value == null)
             return containsNullValue();
-
         Entry[] tab = table;
         for (int i = 0; i < tab.length; i++)
             for (Entry e = tab[i]; e != null; e = e.next)
@@ -950,6 +983,9 @@ public class HashMap<K, V>
             return next != null;
         }
 
+        /**
+         * 按照table顺序向后遍历，若某bucket遍历到最后一个节点了，就遍历table中下一个bucket（即index++），并更新next和current的值。
+         */
         final Entry<K, V> nextEntry() {
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
@@ -959,13 +995,15 @@ public class HashMap<K, V>
 
             if ((next = e.next) == null) {
                 Entry[] t = table;
-                while (index < t.length && (next = t[index++]) == null)
-                    ;
+                while (index < t.length && (next = t[index++]) == null) ;
             }
             current = e;
             return e;
         }
 
+        /**
+         * 获取current的key，调用removeEntryForKey方法删除此key。
+         */
         public void remove() {
             if (current == null)
                 throw new IllegalStateException();

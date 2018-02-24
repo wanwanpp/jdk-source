@@ -216,6 +216,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
             } catch (IllegalArgumentException failed) {
                 throw new Error("Illegal value for 'jdk.map.althashing.threshold'", failed);
             }
+
             ALTERNATIVE_HASHING = threshold <= MAXIMUM_CAPACITY;
         }
     }
