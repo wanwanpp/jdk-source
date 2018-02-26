@@ -630,7 +630,7 @@ public class HashMap<K, V>
      * Transfers all entries from current table to newTable.
      */
     /**
-     * 遍历原map，将各Entry重新计算bucket放入newTable中。
+     * 遍历原table，将各Entry重新计算bucket放入newTable中。
      */
     void transfer(Entry[] newTable, boolean rehash) {
         int newCapacity = newTable.length;
@@ -942,6 +942,7 @@ public class HashMap<K, V>
     void addEntry(int hash, K key, V value, int bucketIndex) {
         if ((size >= threshold) && (null != table[bucketIndex])) {
             resize(2 * table.length);
+            //扩容后hash，bucketIndex需要重新计算。
             hash = (null != key) ? hash(key) : 0;
             bucketIndex = indexFor(hash, table.length);
         }
