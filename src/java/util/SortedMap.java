@@ -120,6 +120,9 @@ public interface SortedMap<K,V> extends Map<K,V> {
      *         or {@code null} if this map uses the natural ordering
      *         of its keys
      */
+    /**
+     * 返回比较器Comparator
+     */
     Comparator<? super K> comparator();
 
     /**
@@ -152,6 +155,9 @@ public interface SortedMap<K,V> extends Map<K,V> {
      *         outside the bounds of the range
      */
 
+    /**
+     * subMap,headMap,tailMap都返回一个视图，视图中包括一部分键值对
+     */
     //返回大于等于fromKey且小于toKey的所有键
     SortedMap<K,V> subMap(K fromKey, K toKey);
 
@@ -219,6 +225,7 @@ public interface SortedMap<K,V> extends Map<K,V> {
      * @return the first (lowest) key currently in this map
      * @throws NoSuchElementException if this map is empty
      */
+    //map中第一个key
     K firstKey();
 
     /**
@@ -227,6 +234,7 @@ public interface SortedMap<K,V> extends Map<K,V> {
      * @return the last (highest) key currently in this map
      * @throws NoSuchElementException if this map is empty
      */
+    //map中最后一个key
     K lastKey();
 
     /**

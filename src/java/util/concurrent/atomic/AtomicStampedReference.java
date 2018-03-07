@@ -25,12 +25,12 @@ package java.util.concurrent.atomic;
  * @author Doug Lea
  * @since 1.5
  */
-//引入时间戳解决CAS的ABA问题。
+//引入stamp标记解决CAS的ABA问题。
 //目标是A, 期望值也是A, 那么CAS操作会成功。但是这时候目标A可能不是原来的那个A了，
-// 它可能是A变成了B，再变成了A。所以叫ABA问题
+//它可能是A变成了B，再变成了A。所以叫ABA问题
 public class AtomicStampedReference<V> {
 
-    //利用Pair类来记录对象引用和时间戳信息，时间戳应该自增。
+    //利用Pair类来记录对象引用和stamp标记信息，stamp标记应该自增。
 
     //不可变对象，其所有属性都为final，类似String。
     private static class Pair<T> {

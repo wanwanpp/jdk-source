@@ -24,8 +24,6 @@
  */
 
 package java.util;
-import java.io.*;
-
 /**
  * <p>Hash table and linked list implementation of the <tt>Map</tt> interface,
  * with predictable iteration order.  This implementation differs from
@@ -335,6 +333,13 @@ public class LinkedHashMap<K,V>
 
         /**
          * Inserts this entry before the specified existing entry in the list.
+         */
+        /**
+         * 在existingEntry前插入Entry
+         * 1.节点的after设为existingEntry
+         * 2.节点的before设为existingEntry的before
+         * 3.existingEntry的before设为this
+         * 4.existingEntry的before的after设为this
          */
         private void addBefore(Entry<K,V> existingEntry) {
             after  = existingEntry;

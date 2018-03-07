@@ -459,7 +459,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
          * 4. 释放锁
          */
         final V put(K key, int hash, V value, boolean onlyIfAbsent) {
-            //调用ReentrantLock的tryLock方法获取锁？？？
+            //调用ReentrantLock的tryLock方法获取锁
             HashEntry<K, V> node = tryLock() ? null : scanAndLockForPut(key, hash, value);
             V oldValue;
             try {
@@ -590,7 +590,10 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
             HashEntry<K, V> e = first;
             HashEntry<K, V> node = null;
             int retries = -1; // negative while locating node
-            while (!tryLock()) {
+            //在scanAndLockForPut方法中，会通过重复执行tryLock()方法尝试获取锁，
+            // 在多处理器环境下，重复次数为64，单处理器重复次数为1，
+            // 当执行tryLock()方法的次数超过上限时，则执行lock()方法挂起线程；
+            while (!tryLock()) {  //tryLock()；
                 HashEntry<K, V> f; // to recheck first below
                 if (retries < 0) {
                     if (e == null) {
@@ -601,8 +604,8 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
                         retries = 0;
                     else
                         e = e.next;
-                } else if (++retries > MAX_SCAN_RETRIES) {
-                    lock();
+                } else if (++retries > MAX_SCAN_RETRIES) { //多线程下为64次，单线程为1次重试
+                    lock();    //lock有挂起的意思，即阻塞着获取锁。知道其他线程unlock
                     break;
                 } else if ((retries & 1) == 0 &&
                         (f = entryForHash(this, hash)) != first) {
@@ -666,7 +669,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
                             //表示要找的就是头结点，则直接更新头结点为next
                             if (pred == null)
                                 setEntryAt(tab, index, next);
-                                //不是头结点
+                            //不是头结点
                             else
                                 pred.setNext(next);
                             ++modCount;
@@ -864,7 +867,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
             ++c;
         //注意这里的cap就是segment中HashEntry数组的长度。
         int cap = MIN_SEGMENT_TABLE_CAPACITY;
-        //cap不是1就是2的n次方
+        //cap为是2的n次方，最小为2。
         while (cap < c)
             cap <<= 1;
         // create segments and segments[0]
