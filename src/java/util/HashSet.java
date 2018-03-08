@@ -31,7 +31,7 @@ package java.util;
  * iteration order of the set; in particular, it does not guarantee that the
  * order will remain constant over time.  This class permits the <tt>null</tt>
  * element.
- *
+ * <p>
  * <p>This class offers constant time performance for the basic operations
  * (<tt>add</tt>, <tt>remove</tt>, <tt>contains</tt> and <tt>size</tt>),
  * assuming the hash function disperses the elements properly among the
@@ -40,19 +40,19 @@ package java.util;
  * "capacity" of the backing <tt>HashMap</tt> instance (the number of
  * buckets).  Thus, it's very important not to set the initial capacity too
  * high (or the load factor too low) if iteration performance is important.
- *
+ * <p>
  * <p><strong>Note that this implementation is not synchronized.</strong>
  * If multiple threads access a hash set concurrently, and at least one of
  * the threads modifies the set, it <i>must</i> be synchronized externally.
  * This is typically accomplished by synchronizing on some object that
  * naturally encapsulates the set.
- *
+ * <p>
  * If no such object exists, the set should be "wrapped" using the
  * {@link Collections#synchronizedSet Collections.synchronizedSet}
  * method.  This is best done at creation time, to prevent accidental
  * unsynchronized access to the set:<pre>
  *   Set s = Collections.synchronizedSet(new HashSet(...));</pre>
- *
+ * <p>
  * <p>The iterators returned by this class's <tt>iterator</tt> method are
  * <i>fail-fast</i>: if the set is modified at any time after the iterator is
  * created, in any way except through the iterator's own <tt>remove</tt>
@@ -60,7 +60,7 @@ package java.util;
  * Thus, in the face of concurrent modification, the iterator fails quickly
  * and cleanly, rather than risking arbitrary, non-deterministic behavior at
  * an undetermined time in the future.
- *
+ * <p>
  * <p>Note that the fail-fast behavior of an iterator cannot be guaranteed
  * as it is, generally speaking, impossible to make any hard guarantees in the
  * presence of unsynchronized concurrent modification.  Fail-fast iterators
@@ -68,31 +68,33 @@ package java.util;
  * Therefore, it would be wrong to write a program that depended on this
  * exception for its correctness: <i>the fail-fast behavior of iterators
  * should be used only to detect bugs.</i>
- *
+ * <p>
  * <p>This class is a member of the
  * <a href="{@docRoot}/../technotes/guides/collections/index.html">
  * Java Collections Framework</a>.
  *
  * @param <E> the type of elements maintained by this set
- *
- * @author  Josh Bloch
- * @author  Neal Gafter
- * @see     Collection
- * @see     Set
- * @see     TreeSet
- * @see     HashMap
- * @since   1.2
+ * @author Josh Bloch
+ * @author Neal Gafter
+ * @see Collection
+ * @see Set
+ * @see TreeSet
+ * @see HashMap
+ * @since 1.2
  */
 //基于HashMap实现
 public class HashSet<E>
-    extends AbstractSet<E>
-    implements Set<E>, Cloneable, java.io.Serializable
-{
+        extends AbstractSet<E>
+        implements Set<E>, Cloneable, java.io.Serializable {
     static final long serialVersionUID = -5024744406713321676L;
 
-    private transient HashMap<E,Object> map;
+    /**
+     * 很多操作都依赖这个map
+     */
+    private transient HashMap<E, Object> map;
 
     // Dummy value to associate with an Object in the backing Map
+    //所有的key都以其为value放入map中。
     private static final Object PRESENT = new Object();
 
     /**
@@ -113,7 +115,7 @@ public class HashSet<E>
      * @throws NullPointerException if the specified collection is null
      */
     public HashSet(Collection<? extends E> c) {
-        map = new HashMap<>(Math.max((int) (c.size()/.75f) + 1, 16));
+        map = new HashMap<>(Math.max((int) (c.size() / .75f) + 1, 16));
         addAll(c);
     }
 
@@ -121,22 +123,23 @@ public class HashSet<E>
      * Constructs a new, empty set; the backing <tt>HashMap</tt> instance has
      * the specified initial capacity and the specified load factor.
      *
-     * @param      initialCapacity   the initial capacity of the hash map
-     * @param      loadFactor        the load factor of the hash map
-     * @throws     IllegalArgumentException if the initial capacity is less
-     *             than zero, or if the load factor is nonpositive
+     * @param initialCapacity the initial capacity of the hash map
+     * @param loadFactor      the load factor of the hash map
+     * @throws IllegalArgumentException if the initial capacity is less
+     *                                  than zero, or if the load factor is nonpositive
      */
     public HashSet(int initialCapacity, float loadFactor) {
         map = new HashMap<>(initialCapacity, loadFactor);
+        HashSet<Object> objects = new HashSet<>();
     }
 
     /**
      * Constructs a new, empty set; the backing <tt>HashMap</tt> instance has
      * the specified initial capacity and default load factor (0.75).
      *
-     * @param      initialCapacity   the initial capacity of the hash table
-     * @throws     IllegalArgumentException if the initial capacity is less
-     *             than zero
+     * @param initialCapacity the initial capacity of the hash table
+     * @throws IllegalArgumentException if the initial capacity is less
+     *                                  than zero
      */
     public HashSet(int initialCapacity) {
         map = new HashMap<>(initialCapacity);
@@ -148,13 +151,14 @@ public class HashSet<E>
      * HashMap instance is a LinkedHashMap with the specified initial
      * capacity and the specified load factor.
      *
-     * @param      initialCapacity   the initial capacity of the hash map
-     * @param      loadFactor        the load factor of the hash map
-     * @param      dummy             ignored (distinguishes this
-     *             constructor from other int, float constructor.)
-     * @throws     IllegalArgumentException if the initial capacity is less
-     *             than zero, or if the load factor is nonpositive
+     * @param initialCapacity the initial capacity of the hash map
+     * @param loadFactor      the load factor of the hash map
+     * @param dummy           ignored (distinguishes this
+     *                        constructor from other int, float constructor.)
+     * @throws IllegalArgumentException if the initial capacity is less
+     *                                  than zero, or if the load factor is nonpositive
      */
+    //此构造函数给LinkedHashSet调用
     HashSet(int initialCapacity, float loadFactor, boolean dummy) {
         map = new LinkedHashMap<>(initialCapacity, loadFactor);
     }
@@ -214,7 +218,7 @@ public class HashSet<E>
      * element
      */
     public boolean add(E e) {
-        return map.put(e, PRESENT)==null;
+        return map.put(e, PRESENT) == null;
     }
 
     /**
@@ -230,7 +234,7 @@ public class HashSet<E>
      * @return <tt>true</tt> if the set contained the specified element
      */
     public boolean remove(Object o) {
-        return map.remove(o)==PRESENT;
+        return map.remove(o) == PRESENT;
     }
 
     /**
@@ -262,13 +266,13 @@ public class HashSet<E>
      * serialize it).
      *
      * @serialData The capacity of the backing <tt>HashMap</tt> instance
-     *             (int), and its load factor (float) are emitted, followed by
-     *             the size of the set (the number of elements it contains)
-     *             (int), followed by all of its elements (each an Object) in
-     *             no particular order.
+     * (int), and its load factor (float) are emitted, followed by
+     * the size of the set (the number of elements it contains)
+     * (int), followed by all of its elements (each an Object) in
+     * no particular order.
      */
     private void writeObject(java.io.ObjectOutputStream s)
-        throws java.io.IOException {
+            throws java.io.IOException {
         // Write out any hidden serialization magic
         s.defaultWriteObject();
 
@@ -289,22 +293,22 @@ public class HashSet<E>
      * deserialize it).
      */
     private void readObject(java.io.ObjectInputStream s)
-        throws java.io.IOException, ClassNotFoundException {
+            throws java.io.IOException, ClassNotFoundException {
         // Read in any hidden serialization magic
         s.defaultReadObject();
 
         // Read in HashMap capacity and load factor and create backing HashMap
         int capacity = s.readInt();
         float loadFactor = s.readFloat();
-        map = (((HashSet)this) instanceof LinkedHashSet ?
-               new LinkedHashMap<E,Object>(capacity, loadFactor) :
-               new HashMap<E,Object>(capacity, loadFactor));
+        map = (((HashSet) this) instanceof LinkedHashSet ?
+                new LinkedHashMap<E, Object>(capacity, loadFactor) :
+                new HashMap<E, Object>(capacity, loadFactor));
 
         // Read in size
         int size = s.readInt();
 
         // Read in all elements in the proper order.
-        for (int i=0; i<size; i++) {
+        for (int i = 0; i < size; i++) {
             E e = (E) s.readObject();
             map.put(e, PRESENT);
         }
