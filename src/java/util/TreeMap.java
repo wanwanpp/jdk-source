@@ -111,19 +111,28 @@ public class TreeMap<K, V>
      *
      * @serial
      */
+    /**
+     * 外比较器
+     */
     private final Comparator<? super K> comparator;
 
+    /**
+     * 红黑树根节点
+     */
     private transient Entry<K, V> root = null;
 
     /**
      * The number of entries in the tree
+     */
+    /**
+     * Entry的个数
      */
     private transient int size = 0;
 
     /**
      * The number of structural modifications to the tree.
      */
-    private transient int modCount = 0;//用于迭代过程中检测结构性变化
+    private transient int modCount = 0;
 
     /**
      * Constructs a new, empty tree map, using the natural ordering of its
