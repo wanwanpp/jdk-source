@@ -142,6 +142,9 @@ package java.util;
  * @since   1.4
  */
 
+/**
+ * 继承自HashMap，维护了一个双向链表来保持Entry间的顺序。
+ */
 public class LinkedHashMap<K,V>
     extends HashMap<K,V>
     implements Map<K,V>
@@ -150,7 +153,7 @@ public class LinkedHashMap<K,V>
     private static final long serialVersionUID = 3801124242820219131L;
 
     /**
-     * The head of the doubly linked list.
+     * 双向链表的头结点
      */
     private transient Entry<K,V> header;
 
@@ -158,7 +161,8 @@ public class LinkedHashMap<K,V>
      * The iteration ordering method for this linked hash map: <tt>true</tt>
      * for access-order, <tt>false</tt> for insertion-order.
      *
-     * @serial
+     * true为访问顺序
+     * false为插入顺序
      */
     private final boolean accessOrder;
 
@@ -226,6 +230,7 @@ public class LinkedHashMap<K,V>
                          float loadFactor,
                          boolean accessOrder) {
         super(initialCapacity, loadFactor);
+        //其他构造方法默认都是false，表示按照插入顺序。
         this.accessOrder = accessOrder;
     }
 
@@ -233,6 +238,7 @@ public class LinkedHashMap<K,V>
      * Called by superclass constructors and pseudoconstructors (clone,
      * readObject) before any entries are inserted into the map.  Initializes
      * the chain.
+     * 设置header节点
      */
     @Override
     void init() {
@@ -244,6 +250,9 @@ public class LinkedHashMap<K,V>
      * Transfers all entries to new table array.  This method is called
      * by superclass resize.  It is overridden for performance, as it is
      * faster to iterate using our linked list.
+     */
+    /**
+     * 覆盖transfer方法，按照链表遍历比HashMap之前的实现速度更快
      */
     @Override
     void transfer(HashMap.Entry[] newTable, boolean rehash) {
@@ -266,6 +275,7 @@ public class LinkedHashMap<K,V>
      * @return <tt>true</tt> if this map maps one or more keys to the
      *         specified value
      */
+    //按照链表遍历
     public boolean containsValue(Object value) {
         // Overridden to take advantage of faster iterator
         if (value==null) {
@@ -296,9 +306,11 @@ public class LinkedHashMap<K,V>
      * distinguish these two cases.
      */
     public V get(Object key) {
+        //调用HashMap中实现的getEntry方法，hash定位速度更快。
         Entry<K,V> e = (Entry<K,V>)getEntry(key);
         if (e == null)
             return null;
+        //更新Entry e的位置
         e.recordAccess(this);
         return e.value;
     }
@@ -307,6 +319,7 @@ public class LinkedHashMap<K,V>
      * Removes all of the mappings from this map.
      * The map will be empty after this call returns.
      */
+    //调用HashMap的clear方法，并重置header
     public void clear() {
         super.clear();
         header.before = header.after = header;
@@ -317,6 +330,7 @@ public class LinkedHashMap<K,V>
      */
     private static class Entry<K,V> extends HashMap.Entry<K,V> {
         // These fields comprise the doubly linked list used for iteration.
+        //双向链表的before和after
         Entry<K,V> before, after;
 
         Entry(int hash, K key, V value, HashMap.Entry<K,V> next) {
@@ -324,7 +338,7 @@ public class LinkedHashMap<K,V>
         }
 
         /**
-         * Removes this entry from the linked list.
+         * 在链表中删除此Entry
          */
         private void remove() {
             before.after = after;
@@ -353,6 +367,9 @@ public class LinkedHashMap<K,V>
          * of a pre-existing entry is read by Map.get or modified by Map.set.
          * If the enclosing Map is access-ordered, it moves the entry
          * to the end of the list; otherwise, it does nothing.
+         */
+        /**
+         * 删除后放到最后一个（即header的前面一个）
          */
         void recordAccess(HashMap<K,V> m) {
             LinkedHashMap<K,V> lm = (LinkedHashMap<K,V>)m;
@@ -431,7 +448,7 @@ public class LinkedHashMap<K,V>
     void addEntry(int hash, K key, V value, int bucketIndex) {
         super.addEntry(hash, key, value, bucketIndex);
 
-        // Remove eldest entry if instructed
+        // 是否需要删除最老的元素？
         Entry<K,V> eldest = header.after;
         if (removeEldestEntry(eldest)) {
             removeEntryForKey(eldest.key);
