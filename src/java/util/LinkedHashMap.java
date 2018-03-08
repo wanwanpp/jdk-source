@@ -445,6 +445,7 @@ public class LinkedHashMap<K,V>
      * allocated entry to get inserted at the end of the linked list and
      * removes the eldest entry if appropriate.
      */
+    //HashMap的put方法会调用，添加了是否删除老节点的逻辑
     void addEntry(int hash, K key, V value, int bucketIndex) {
         super.addEntry(hash, key, value, bucketIndex);
 
@@ -459,6 +460,7 @@ public class LinkedHashMap<K,V>
      * This override differs from addEntry in that it doesn't resize the
      * table or remove the eldest entry.
      */
+    //HashMap的addEntry方法会调用，添加了将Entry添加到链表末尾的逻辑。
     void createEntry(int hash, K key, V value, int bucketIndex) {
         HashMap.Entry<K,V> old = table[bucketIndex];
         Entry<K,V> e = new Entry<>(hash, key, value, old);

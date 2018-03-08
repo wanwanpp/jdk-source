@@ -115,6 +115,11 @@ package java.util;
  * @since   1.4
  */
 
+/**
+ * 基于LinkedHashMap
+ * 其构造方法实现为  super(initialCapacity, loadFactor, true)
+ * 而HashMap中这一构造方法为map = new LinkedHashMap<>(initialCapacity, loadFactor);
+ */
 public class LinkedHashSet<E>
     extends HashSet<E>
     implements Set<E>, Cloneable, java.io.Serializable {
