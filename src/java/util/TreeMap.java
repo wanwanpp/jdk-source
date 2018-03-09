@@ -257,7 +257,7 @@ public class TreeMap<K, V>
      * @since 1.2
      */
 
-    //从第一个节点开始，一次寻找后继节点进行遍历比较
+    //从第一个节点开始，依次寻找后继节点进行遍历比较
     public boolean containsValue(Object value) {
         for (Entry<K, V> e = getFirstEntry(); e != null; e = successor(e))
             if (valEquals(value, e.value))
@@ -579,9 +579,11 @@ public class TreeMap<K, V>
                 else if (cmp > 0)
                     t = t.right;
                 else
-                    return t.setValue(value);//节点已经存在，更新并返回value值
+                    //节点已经存在，更新并返回value值
+                    return t.setValue(value);
             } while (t != null);
-        } else {//没有比较器，则通过Comparable.compareTo方法进行比较
+        } else {
+            //没有比较器，则通过Comparable.compareTo方法进行比较
             if (key == null)
                 throw new NullPointerException();
             Comparable<? super K> k = (Comparable<? super K>) key;
@@ -596,7 +598,6 @@ public class TreeMap<K, V>
                     return t.setValue(value);
             } while (t != null);
         }
-
 
         Entry<K, V> e = new Entry<>(key, value, parent);
 
@@ -629,6 +630,7 @@ public class TreeMap<K, V>
 
     //根据key找到节点，然后删除节点，最后返回原来的值
     public V remove(Object key) {
+        //先得到Entry
         Entry<K, V> p = getEntry(key);
         if (p == null)
             return null;
@@ -642,6 +644,7 @@ public class TreeMap<K, V>
      * Removes all of the mappings from this map.
      * The map will be empty after this call returns.
      */
+    //直接将root设为null
     public void clear() {
         modCount++;
         size = 0;
@@ -2056,7 +2059,8 @@ public class TreeMap<K, V>
         Entry<K, V> left = null;
         Entry<K, V> right = null;
         Entry<K, V> parent;
-        boolean color = BLACK;  //每个节点都有一个颜色，非黑即红
+        //节点颜色默认为黑色。所有节点非黑即红。
+        boolean color = BLACK;
 
         Entry(K key, V value, Entry<K, V> parent) {
             this.key = key;
@@ -2131,13 +2135,14 @@ public class TreeMap<K, V>
     static <K, V> TreeMap.Entry<K, V> successor(Entry<K, V> t) {
         if (t == null)
             return null;
-        else if (t.right != null) {//在右子树中找后继节点，后继节点为右子树中的最小节点
+            //有右孩子，后继节点为右子树中的最小节点
+        else if (t.right != null) {
             Entry<K, V> p = t.right;
             while (p.left != null)
                 p = p.left;
             return p;
-        } else {//后继为某祖先节点，从当前节点往上找，如果它是父节点的右孩子，则继续找父节点，
-            // 直到它不是右孩子或父节点为空，第一个非右孩子节点的父亲节点就是后继节点，如果父节点为空，则后继为null。
+        } else {
+            //没有右孩子，则其后继节点为父节点或某祖先节点，若是父节点的右孩子，则向上找直到不是父节点的右孩子或父节点为null，
             Entry<K, V> p = t.parent;
             Entry<K, V> ch = t;
             while (p != null && ch == p.right) {
@@ -2308,7 +2313,8 @@ public class TreeMap<K, V>
 
 
         if (replacement != null) {//不为叶子节点
-            // Link replacement to parent，建立被删节点父节点与被删节点孩子节点的关系，（）被删节点只有一个孩子节点
+            // Link replacement to parent
+            // 建立被删节点父节点与被删节点孩子节点的关系，被删节点只有一个孩子节点
             replacement.parent = p.parent;
             if (p.parent == null)
                 root = replacement;
@@ -2324,7 +2330,7 @@ public class TreeMap<K, V>
             // Fix replacement
             if (p.color == BLACK)
                 fixAfterDeletion(replacement);
-        } else if (p.parent == null) { // return if we are the only node.
+        } else if (p.parent == null) { // 若p是最后一个节点。
             root = null;
         } else { //  No children. Use self as phantom replacement and unlink.
             // 没有孩子节点
