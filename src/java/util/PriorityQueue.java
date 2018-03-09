@@ -347,6 +347,9 @@ public class PriorityQueue<E> extends AbstractQueue<E>
         return (E) queue[0];
     }
 
+    /**
+     * 按数组从前往后遍历，返回元素的下标
+     */
     private int indexOf(Object o) {
         if (o != null) {
             for (int i = 0; i < size; i++)
@@ -366,6 +369,11 @@ public class PriorityQueue<E> extends AbstractQueue<E>
      *
      * @param o element to be removed from this queue, if present
      * @return {@code true} if this queue changed as a result of the call
+     */
+    /**
+     * 删除元素
+     * 1.先得到元素在数组中存储的下标
+     *  2.删除元素
      */
     public boolean remove(Object o) {
         int i = indexOf(o);
@@ -609,12 +617,16 @@ public class PriorityQueue<E> extends AbstractQueue<E>
         assert i >= 0 && i < size;
         modCount++;
         int s = --size;
-        if (s == i) // removed last element
+        //若是最后一个元素，直接将其置为null
+        if (s == i)
             queue[i] = null;
         else {
+            //获取最后一个节点，用于调整
             E moved = (E) queue[s];
             queue[s] = null;
+            //尝试向下调整
             siftDown(i, moved);
+            //若上面没有向下调整，就向上调整
             if (queue[i] == moved) {
                 siftUp(i, moved);
                 if (queue[i] != moved)
@@ -727,6 +739,9 @@ public class PriorityQueue<E> extends AbstractQueue<E>
     /**
      * Establishes the heap invariant (described above) in the entire tree,
      * assuming nothing about the order of the elements prior to the call.
+     */
+    /**
+     * 从最后一个非叶子节点（向前遍历）开始向下调整
      */
     private void heapify() {
         for (int i = (size >>> 1) - 1; i >= 0; i--)
