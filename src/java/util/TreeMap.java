@@ -606,8 +606,8 @@ public class TreeMap<K, V>
             parent.left = e;
         else
             parent.right = e;
-
-        fixAfterInsertion(e);//调整树的结构，使之符合红黑树的约束
+        //调整树的结构，使之符合红黑树的约束
+        fixAfterInsertion(e);
         size++;
         modCount++;
         return null;
@@ -2310,7 +2310,6 @@ public class TreeMap<K, V>
 
         // Start fixup at replacement node, if it exists.
         Entry<K, V> replacement = (p.left != null ? p.left : p.right);//p的孩子节点
-
 
         if (replacement != null) {//不为叶子节点
             // Link replacement to parent

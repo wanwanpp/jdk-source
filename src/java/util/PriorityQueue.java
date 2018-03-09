@@ -273,6 +273,9 @@ public class PriorityQueue<E> extends AbstractQueue<E>
      *
      * @param minCapacity the desired minimum capacity
      */
+    /**
+     * 若原长度小于64，就扩容大概为2倍，否则1.5倍。
+     */
     private void grow(int minCapacity) {
         int oldCapacity = queue.length;
         // Double size if small; else grow by 50%
@@ -315,6 +318,13 @@ public class PriorityQueue<E> extends AbstractQueue<E>
      *         according to the priority queue's ordering
      * @throws NullPointerException if the specified element is null
      */
+    //添加元素
+
+    /**
+     * 1.检查是否需要扩容
+     * 2.若队列为空，就直接添加第一个元素到queue[0]
+     * 3.若不为空，就按照堆的方式，先添加到最后一个位置，然后自底向上调整。
+     */
     public boolean offer(E e) {
         if (e == null)
             throw new NullPointerException();
@@ -330,6 +340,7 @@ public class PriorityQueue<E> extends AbstractQueue<E>
         return true;
     }
 
+//    返回数组第一个元素
     public E peek() {
         if (size == 0)
             return null;
@@ -566,15 +577,18 @@ public class PriorityQueue<E> extends AbstractQueue<E>
         size = 0;
     }
 
+    //删除头结点
+    //思想是把最后一个元素放到根节点，删掉最后一个元素，然后根节点自顶向下调整。
     public E poll() {
         if (size == 0)
             return null;
         int s = --size;
         modCount++;
-        E result = (E) queue[0];
-        E x = (E) queue[s];
-        queue[s] = null;
+        E result = (E) queue[0];  //头结点，result记录方便后面返回
+        E x = (E) queue[s];         //最后一个元素
+        queue[s] = null;           //最后一个元素置为null
         if (s != 0)
+            //向下调整
             siftDown(0, x);
         return result;
     }
@@ -622,6 +636,11 @@ public class PriorityQueue<E> extends AbstractQueue<E>
      * @param k the position to fill
      * @param x the item to insert
      */
+    /**
+     * 自底向上调整
+     * 分为用comparator和comparable两种
+     * 若小于父节点，就交换位置，继续递归比较，指定大于或等于父节点
+     */
     private void siftUp(int k, E x) {
         if (comparator != null)
             siftUpUsingComparator(k, x);
@@ -641,14 +660,14 @@ public class PriorityQueue<E> extends AbstractQueue<E>
         }
         queue[k] = key;
     }
-
+    //若小于父节点，就交换位置，继续递归比较，指定大于父节点
     private void siftUpUsingComparator(int k, E x) {
         while (k > 0) {
             int parent = (k - 1) >>> 1;
             Object e = queue[parent];
             if (comparator.compare(x, (E) e) >= 0)
                 break;
-            queue[k] = e;
+            queue[k] = e;     //父节点元素移到当前元素位置
             k = parent;
         }
         queue[k] = x;
@@ -669,15 +688,16 @@ public class PriorityQueue<E> extends AbstractQueue<E>
             siftDownComparable(k, x);
     }
 
+    //选出最小的孩子节点与当前节点比较，若小于孩子节点则不变，否则孩子节点上移，继续循环直到当前节点小于孩子节点。
     private void siftDownComparable(int k, E x) {
         Comparable<? super E> key = (Comparable<? super E>)x;
         int half = size >>> 1;        // loop while a non-leaf
-        while (k < half) {
+        while (k < half) {   //表示k节点右孩子节点。
             int child = (k << 1) + 1; // assume left child is least
             Object c = queue[child];
             int right = child + 1;
-            if (right < size &&
-                ((Comparable<? super E>) c).compareTo((E) queue[right]) > 0)
+            //选择最小的孩子节点用于比较
+            if (right < size && ((Comparable<? super E>) c).compareTo((E) queue[right]) > 0)
                 c = queue[child = right];
             if (key.compareTo((E) c) <= 0)
                 break;
