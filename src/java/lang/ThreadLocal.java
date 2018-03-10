@@ -269,7 +269,7 @@ public class ThreadLocal<T> {
      * the table starts running out of space.
      */
     //静态内部类
-    //就是一个Entry数组，不想HashMap使用了数组加链表
+    //就是一个Entry数组，不像HashMap使用了数组加链表
     //这里哈希冲突时用的线性探测法，不是链地址法
     static class ThreadLocalMap {
 
@@ -281,9 +281,9 @@ public class ThreadLocal<T> {
          * entry can be expunged from table.  Such entries are referred to
          * as "stale entries" in the code that follows.
          */
-        //继承自虚引用，当垃圾回收时引用所指的对象会被GC
+        //继承自弱引用，当垃圾回收时引用所指的对象会被GC
         //Entry类继承了WeakReference<ThreadLocal<?>>，即每个Entry对象都有一个ThreadLocal的弱引用（作为key），
-        // 这是为了防止内存泄露。一旦线程结束，key变为一个不可达的对象，这个Entry就可以被GC了
+        //这是为了防止内存泄露。一旦线程结束，key变为一个不可达的对象，这个Entry就可以被GC了
         static class Entry extends WeakReference<ThreadLocal> {
             /**
              * The value associated with this ThreadLocal.

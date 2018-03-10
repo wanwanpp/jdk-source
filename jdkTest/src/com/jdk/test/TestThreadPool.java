@@ -61,6 +61,7 @@ public class TestThreadPool {
         final int STOP = 1 << COUNT_BITS;
         final int TIDYING = 2 << COUNT_BITS;
         final int TERMINATED = 3 << COUNT_BITS;
+        System.out.println("-1的二进制"+Integer.toBinaryString(-1));
         System.out.println("running: " + Integer.toBinaryString(RUNNING));
         System.out.println("SHUTDOWN: " + Integer.toBinaryString(SHUTDOWN));
         System.out.println("STOP: " + Integer.toBinaryString(STOP));

@@ -374,11 +374,11 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * that workerCount is 0 (which sometimes entails a recheck -- see
      * below).
      */
-    private final AtomicInteger ctl = new AtomicInteger(ctlOf(RUNNING, 0));//running \ 0 = running。前3位表示运行状态，后29位表示工作线程的数量。
+    //running \ 0 = running。前3位表示运行状态，后29位表示工作线程的数量。
+    private final AtomicInteger ctl = new AtomicInteger(ctlOf(RUNNING, 0));
     private static final int COUNT_BITS = Integer.SIZE - 3;//29
-    //   11111111111111111111111111111    29个1
+    //   11111111111111111111111111111    29个1       2的29次方减一
     private static final int CAPACITY = (1 << COUNT_BITS) - 1;
-
 
     //线程池的五种状态
 
@@ -393,9 +393,6 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
     //STOP                 100000000000000000000000000000
     //TIDYING:          1000000000000000000000000000000
     //TERMINATEd:   1100000000000000000000000000000
-
-    //这个类中将二进制数分为了两部分，高位代表线程池状态（ runState），低位代表活动线程数（ workerCount），
-    // CAPACITY代表最大的活动线程数，为2^29-1
 
     private static final int RUNNING = -1 << COUNT_BITS;
     private static final int SHUTDOWN = 0 << COUNT_BITS;
@@ -507,7 +504,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * Tracks largest attained pool size. Accessed only under
      * mainLock.
      */
-    //跟踪最大的泳池大小。只有在mainlock访问。
+    //达到的最大线程池大小。只有在mainlock访问。
     private int largestPoolSize;
 
     /**
@@ -646,7 +643,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         /**
          * Per-thread task counter
          */
-        //每个工作线程的任务计数器
+        //已完成任务的计数器
         volatile long completedTasks;
 
         /**
@@ -958,8 +955,14 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      *                  state).
      * @return true if successful
      */
+    /**
+     * 1.更新ctl的值
+     * 2.创建Worker实例，并添加至workers中
+     * 3.启动Worker中线程
+     */
     private boolean addWorker(Runnable firstTask, boolean core) {
         retry:
+        //这个循环主要是为了使ctl的值自增。为什么不直接用ctl遍历的incrementAndGet呢？因为这里我们不一定要自增成功，还要判断当前线程的数量合不合法。
         for (; ; ) {
             int c = ctl.get();//大多数情况就是ctl的值
             int rs = runStateOf(c);
@@ -974,8 +977,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
 
             for (; ; ) {
                 int wc = workerCountOf(c);//worker的数量，即线程池中工作线程的数量。
-                if (wc >= CAPACITY ||
-                        wc >= (core ? corePoolSize : maximumPoolSize))//数量不合法
+                if (wc >= CAPACITY || wc >= (core ? corePoolSize : maximumPoolSize))//线程数不合法
                     return false;
                 if (compareAndIncrementWorkerCount(c))//工作线程数量加1.  ctl的值表示当前工作线程数
                     break retry;
@@ -986,13 +988,14 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
             }
         }
 
+        //下面开始创建Worker
         boolean workerStarted = false;//工作线程启动成功
         boolean workerAdded = false;//工作线程添加成功
         Worker w = null;
         try {
             final ReentrantLock mainLock = this.mainLock;
-            w = new Worker(firstTask);
-            final Thread t = w.thread;
+            w = new Worker(firstTask);   //Worker类封装了一个线程和一个Runnable的task
+            final Thread t = w.thread;    //获取Worker中的工作线程
             if (t != null) {
                 mainLock.lock();
                 try {
@@ -1017,6 +1020,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                     mainLock.unlock();
                 }
                 if (workerAdded) {
+                    //启动线程
                     //执行runWorker()方法。里面有beforeExecutor，afterExecutor方法。在commond.run()方法的前后执行。
                     //在调用Worker的构造函数时，this.thread = getThreadFactory().newThread(this);这一句会将Worker当做
                     // 一个任务（Worker实现了Runnable接口），所以t.start()会调用Worker的run方法执行runWorker。
