@@ -133,8 +133,7 @@ public class Hashtable<K, V>
     /**
      * The hash table data.
      */
-    // Hashtable保存key-value的数组。
-    // Hashtable是采用拉链法实现的，每一个Entry本质上是一个单向链表
+    // 和HashMap一样，采用链表法实现，每一个Entry本质上是一个单向链表
     private transient Entry<K, V>[] table;
 
     /**
@@ -247,6 +246,7 @@ public class Hashtable<K, V>
         return switching;
     }
 
+    //比起HashMap，这个方法的实现更简单，其散列效果不如HashMap的好
     private int hash(Object k) {
         // hashSeed will be zero if alternative hashing is disabled.
         return hashSeed ^ k.hashCode();

@@ -437,7 +437,9 @@ public class LinkedList<E>
             pred = newNode;
         }
 
-        //根据不同情况处理c中最后一个元素与后半部分（可能后半部分为null）第一个元素的连接
+        //此时pred是添加的集合c中最后一个元素
+        //下面判断若succ为空，则直接last=pred
+        //若succ不为空，则连接pred和succ
         if (succ == null) {
             last = pred;
         } else {
