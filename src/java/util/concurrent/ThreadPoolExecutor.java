@@ -884,6 +884,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * Invokes the rejected execution handler for the given command.
      * Package-protected for use by ScheduledThreadPoolExecutor.
      */
+    //使用handler执行拒绝策略
     final void reject(Runnable command) {
         handler.rejectedExecution(command, this);
     }
@@ -1453,6 +1454,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                 reject(command);    //拒绝任务
             else if (workerCountOf(recheck) == 0)
                 //如果活动线程数为0，则创建新线程
+                //若corePoolSize设为0（如newCachedThreadPool），就会执行这里的逻辑
                 addWorker(null, false);//如果 true，则使用 corePoolSize 作为边界，否则使用 maximumPoolSize 作为边界
         }
         //如果线程池不处于RUNNING状态，或者workQueue满了，则执行以下代码
