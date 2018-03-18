@@ -91,13 +91,15 @@ public class FutureTask<V> implements RunnableFuture<V> {
      * NEW -> INTERRUPTING -> INTERRUPTED
      */
 
-    /* 1、NEW（开始状态）
-       2、COMPLETING（正在运行状态）
-       3、NORMAL （正常运行完结束状态）
-       4、EXCEPTIONAL (异常状态)
-       5、CANCELLED （取消状态）
-       6、INTERRUPTING （中断）
-       7、INTERRUPTED （中断结束状态）*/
+    /**
+     * 1、NEW（开始状态）
+     * 2、COMPLETING（正在运行状态）
+     * 3、NORMAL （正常运行完结束状态）
+     * 4、EXCEPTIONAL (异常状态)
+     * 5、CANCELLED （取消状态）
+     * 6、INTERRUPTING （正在中断）
+     * 7、INTERRUPTED （中断结束状态）
+     */
     private volatile int state;
     private static final int NEW = 0;
     private static final int COMPLETING = 1;
@@ -119,10 +121,12 @@ public class FutureTask<V> implements RunnableFuture<V> {
     /**
      * The thread running the callable; CASed during run()
      */
+    //执行线程，赋为当前线程
     private volatile Thread runner;
     /**
      * Treiber stack of waiting threads
      */
+    //一个等待线程的链表
     private volatile WaitNode waiters;
 
     /**
@@ -202,7 +206,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
     //学习博客：http://blog.csdn.net/u010412719/article/details/52137262
     public V get() throws InterruptedException, ExecutionException {
         int s = state;
-        if (s <= COMPLETING)       //处于NEW或者COMPLETING，即开始状态和正在运行的状态。则执行。
+        if (s <= COMPLETING)       //未完成处于NEW或者COMPLETING，即开始状态和正在运行的状态。
             s = awaitDone(false, 0L);
         return report(s);
     }
@@ -242,6 +246,12 @@ public class FutureTask<V> implements RunnableFuture<V> {
      *
      * @param v the value
      */
+    /**
+     * 1. 先将状态设为Completing
+     * 2. 将计算结果赋给outcome
+     * 3. 状态设置为Normal
+     * 4.
+     */
     protected void set(V v) {
         if (UNSAFE.compareAndSwapInt(this, stateOffset, NEW, COMPLETING)) {
             outcome = v;
@@ -268,18 +278,22 @@ public class FutureTask<V> implements RunnableFuture<V> {
         }
     }
 
+    //1. run赋为当前线程
+    //2. 若Callable不为空且当前FutureTask状态为NEW，就执行call方法（这里的方法执行是阻塞的）
+    //3. 执行完后，调用set方法，更改状态为COMPLETING，将执行结果赋给outcome成员变量，再将状态改为NORMAL
     public void run() {
-        if (state != NEW ||
-                !UNSAFE.compareAndSwapObject(this, runnerOffset,
-                        null, Thread.currentThread()))
+        //1. 判断状态
+        //2. 给runner赋为当前线程
+        if (state != NEW || !UNSAFE.compareAndSwapObject(this, runnerOffset, null, Thread.currentThread()))
             return;
         try {
             Callable<V> c = callable;
+            //Callable不为空且当前状态为NEW
             if (c != null && state == NEW) {
                 V result;
                 boolean ran;
                 try {
-                    result = c.call();          //call()方法中执行了runnable的run()方法。
+                    result = c.call();          //call()方法中执行了runnable task的run()方法。
                     ran = true;
                 } catch (Throwable ex) {
                     result = null;
@@ -377,20 +391,23 @@ public class FutureTask<V> implements RunnableFuture<V> {
     }
 
     /**
-     * Removes and signals all waiting threads, invokes done(), and
-     * nulls out callable.
+     * Removes and signals all waiting threads, invokes done(), and nulls out callable.
      */
+    //主要工作时唤醒之前在调用get()时被park的线程们
     private void finishCompletion() {
         // assert state > COMPLETING;
+        //CAS+自旋，将waiter改为null失败就自旋重试。
         for (WaitNode q; (q = waiters) != null; ) {
             if (UNSAFE.compareAndSwapObject(this, waitersOffset, q, null)) {
                 for (; ; ) {
                     Thread t = q.thread;
                     if (t != null) {
                         q.thread = null;
+                        //唤醒线程
                         LockSupport.unpark(t);
                     }
                     WaitNode next = q.next;
+                    //若后面没有waiter了，就结束唤醒等待线程的任务
                     if (next == null)
                         break;
                     q.next = null; // unlink to help gc
@@ -399,9 +416,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
                 break;
             }
         }
-
-        done();
-
+        done();  //钩子方法
         callable = null;        // to reduce footprint
     }
 
@@ -413,13 +428,13 @@ public class FutureTask<V> implements RunnableFuture<V> {
      * @return state upon completion
      */
     //如果执行完了就返回当前的状态值。
-    private int awaitDone(boolean timed, long nanos)
-            throws InterruptedException {
+    private int awaitDone(boolean timed, long nanos) throws InterruptedException {
         final long deadline = timed ? System.nanoTime() + nanos : 0L;
         WaitNode q = null;
         boolean queued = false;
         for (; ; ) {
-            if (Thread.interrupted()) {  //判断是否被中断
+            //如果执行get的线程被中断，则移除FutureTask的所有阻塞队列中的线程（waiters）,并抛出中断异常；
+            if (Thread.interrupted()) {
                 removeWaiter(q);
                 throw new InterruptedException();
             }
@@ -429,20 +444,21 @@ public class FutureTask<V> implements RunnableFuture<V> {
                     q.thread = null;
                 return s;
             } else if (s == COMPLETING) // cannot time out yet           还在执行
-                Thread.yield();                                     //等待
-            else if (q == null)
+                Thread.yield();                                     //让出cpu
+            else if (q == null)    //第一个步
+                //创建等待节点
                 q = new WaitNode();
-            else if (!queued)
-                queued = UNSAFE.compareAndSwapObject(this, waitersOffset,
-                        q.next = waiters, q);
-            else if (timed) {
+            else if (!queued)     //第二步
+                //添加到waiters等待线程队列中去
+                queued = UNSAFE.compareAndSwapObject(this, waitersOffset, q.next = waiters, q);
+            else if (timed) {  //判断超时情况
                 nanos = deadline - System.nanoTime();
                 if (nanos <= 0L) {
                     removeWaiter(q);
                     return state;            //超时则返回此时的状态。
                 }
                 LockSupport.parkNanos(this, nanos);       //未超时则阻塞当前线程。
-            } else
+            } else                 //第三步
                 LockSupport.park(this);                          //上面条件都不符合就阻塞当前线程。
         }
     }
