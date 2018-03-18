@@ -153,6 +153,7 @@ public class ThreadLocal<T> {
                 return (T) e.value;
             }
         }
+        //若map中找不到就返回设置的初值。
         return setInitialValue();
     }
 
@@ -162,6 +163,7 @@ public class ThreadLocal<T> {
      *
      * @return the initial value
      */
+    //设置为初值
     private T setInitialValue() {
         T value = initialValue();
         Thread t = Thread.currentThread();
@@ -205,6 +207,7 @@ public class ThreadLocal<T> {
      *
      * @since 1.5
      */
+    //ThreadLocal的remove放法仅仅是清除当前线程中ThreadLocalMap的以此ThreadLocal为key的Entry
     public void remove() {
         ThreadLocalMap m = getMap(Thread.currentThread());
         if (m != null)
@@ -283,7 +286,6 @@ public class ThreadLocal<T> {
          */
         //继承自弱引用，当垃圾回收时引用所指的对象会被GC
         //Entry类继承了WeakReference<ThreadLocal<?>>，即每个Entry对象都有一个ThreadLocal的弱引用（作为key），
-        //这是为了防止内存泄露。一旦线程结束，key变为一个不可达的对象，这个Entry就可以被GC了
         static class Entry extends WeakReference<ThreadLocal> {
             /**
              * The value associated with this ThreadLocal.
@@ -331,7 +333,7 @@ public class ThreadLocal<T> {
         /**
          * Increment i modulo len.
          */
-        //ThreadLocalMap解决冲突的方法是线性探测法（不断加1），而不是HashMap的链地址法
+        //ThreadLocalMap解决冲突的方法是线性探测法（也叫做开放定址法，做法是不断加1），而不是HashMap的链地址法
         private static int nextIndex(int i, int len) {
             return ((i + 1 < len) ? i + 1 : 0);
         }
@@ -454,13 +456,12 @@ public class ThreadLocal<T> {
             int len = tab.length;
             int i = key.threadLocalHashCode & (len - 1);
 
-            for (Entry e = tab[i];
-                 e != null;
-                 e = tab[i = nextIndex(i, len)]) {
+            for (Entry e = tab[i]; e != null; e = tab[i = nextIndex(i, len)]) {
                 //获取Entry中的key
                 ThreadLocal k = e.get();
 
                 if (k == key) {
+                    //更新值
                     e.value = value;
                     return;
                 }
@@ -491,8 +492,9 @@ public class ThreadLocal<T> {
                  e != null;
                  e = tab[i = nextIndex(i, len)]) {
                 if (e.get() == key) {
-                    //这是Reference中的方法
+                    //这是Reference中的方法，使Reference中被引用的对象为null
                     e.clear();
+                    //删除此处的陈旧条目
                     expungeStaleEntry(i);
                     return;
                 }
@@ -514,6 +516,7 @@ public class ThreadLocal<T> {
          * @param staleSlot index of the first stale entry encountered while
          *                  searching for key.
          */
+        //set方法在遍历的时候，如果遇到key为null，就调用replaceStaleEntry方法替换掉。
         private void replaceStaleEntry(ThreadLocal key, Object value,
                                        int staleSlot) {
             Entry[] tab = table;
@@ -583,11 +586,13 @@ public class ThreadLocal<T> {
          * (all between staleSlot and this slot will have been checked
          * for expunging).
          */
+        //get 方法会在遍历的时候如果遇到key为null，就调用expungeStaleEntry方法擦除
         private int expungeStaleEntry(int staleSlot) {
             Entry[] tab = table;
             int len = tab.length;
 
             // expunge entry at staleSlot
+            //将Entry设为null，Entry也设为null
             tab[staleSlot].value = null;
             tab[staleSlot] = null;
             size--;

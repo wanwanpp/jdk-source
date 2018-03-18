@@ -262,6 +262,7 @@ public interface BlockingQueue<E> extends Queue<E> {
      * @return the head of this queue
      * @throws InterruptedException if interrupted while waiting
      */
+    //阻塞等待
     E take() throws InterruptedException;
 
     /**

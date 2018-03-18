@@ -60,6 +60,7 @@ public class PhantomReference<T> extends Reference<T> {
      *
      * @return  <code>null</code>
      */
+    //无法根据虚引用来取得对象实例。
     public T get() {
         return null;
     }

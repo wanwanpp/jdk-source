@@ -764,8 +764,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
     @SuppressWarnings("unchecked")
     static final <K, V> Segment<K, V> segmentAt(Segment<K, V>[] ss, int j) {
         long u = (j << SSHIFT) + SBASE;
-        return ss == null ? null :
-                (Segment<K, V>) UNSAFE.getObjectVolatile(ss, u);
+        return ss == null ? null : (Segment<K, V>) UNSAFE.getObjectVolatile(ss, u);
     }
 
     /**
