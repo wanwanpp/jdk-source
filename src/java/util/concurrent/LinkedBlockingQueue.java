@@ -132,7 +132,6 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
     /**
      * The capacity bound, or Integer.MAX_VALUE if none
      */
-    //����
     private final int capacity;
 
     /**
