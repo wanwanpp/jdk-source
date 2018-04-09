@@ -372,6 +372,7 @@ public class CopyOnWriteArrayList<E>
      *
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
+    //直接放回数组中当前下标的元素
     public E get(int index) {
         return get(getArray(), index);
     }
@@ -382,6 +383,8 @@ public class CopyOnWriteArrayList<E>
      *
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
+    //set操作若传入的需要修改的元素和当前下标的元素不同，也需要创建新的数组.
+    //若元素相同则不需要创建新数组来修改，还是使用旧数组。
     public E set(int index, E element) {
         final ReentrantLock lock = this.lock;
         lock.lock();
@@ -389,6 +392,7 @@ public class CopyOnWriteArrayList<E>
             Object[] elements = getArray();
             E oldValue = get(elements, index);
 
+            //确认需要修改
             if (oldValue != element) {
                 int len = elements.length;
                 Object[] newElements = Arrays.copyOf(elements, len);
@@ -409,6 +413,15 @@ public class CopyOnWriteArrayList<E>
      *
      * @param e element to be appended to this list
      * @return <tt>true</tt> (as specified by {@link Collection#add})
+     */
+    /**
+     * 与ArrayList的不同时每次添加元素时都会创建一个新的数组。
+     * 1. 加锁
+     * 2. 创建一个大小为当前元素个数+1的数组
+     * 3. 将之前数组的内容复制到新数组中
+     * 4. 将要添加的元素放在新数组的末尾
+     * 5. 用新数组替换旧数组
+     * 6. 释放锁
      */
     public boolean add(E e) {
         final ReentrantLock lock = this.lock;
@@ -502,6 +515,15 @@ public class CopyOnWriteArrayList<E>
      * @param o element to be removed from this list, if present
      * @return <tt>true</tt> if this list contained the specified element
      */
+    /**
+     * 也会创建新的数组
+     * 1. 加锁
+     * 2. 创建当前个数-1大小的数组
+     * 3. 遍历数组，若找到要删除的元素，则将之后的数组全放到新数组中，用新数组替换旧数组并返回true，若未找到则将当前元素放到新数组中。
+     * 4. 特殊情况，若要删除的元素是最后一个元素，则直接用新数组替换旧数组，并返回true
+     * 5. 未找到要删除的元素就返回false
+     * 6. 释放锁
+     */
     public boolean remove(Object o) {
         final ReentrantLock lock = this.lock;
         lock.lock();
@@ -525,7 +547,7 @@ public class CopyOnWriteArrayList<E>
                         newElements[i] = elements[i];
                 }
 
-                // special handling for last cell
+                //若要寻找的元素时最后一个
                 if (eq(o, elements[newlen])) {
                     setArray(newElements);
                     return true;
@@ -579,6 +601,13 @@ public class CopyOnWriteArrayList<E>
      *
      * @param e element to be added to this list, if absent
      * @return <tt>true</tt> if the element was added
+     */
+    /**
+     * 1. 加锁
+     * 2. 创建一个大小为len+1的新数组
+     * 3. 遍历数组，若找到和添加元素一样的元素就直接返回
+     * 4. 若找不到一样的元素就在新数组末尾添加要添加的元素，最后返回true。
+     * 5. 释放锁
      */
     public boolean addIfAbsent(E e) {
         final ReentrantLock lock = this.lock;
